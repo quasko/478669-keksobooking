@@ -2,12 +2,7 @@
 
 var ADVERTS_COUNT = 8;
 var AVATARS_COUNT = 8;
-var AVATAR = {
-  FILE_PATH: 'img/avatars/user',
-  FILE_TYPE: {
-    PNG: '.png'
-  }
-};
+var AVATAR_FOLDER_PATH = 'img/avatars/user';
 var MIN_GUESTS_COUNT = 5;
 var MAX_GUESTS_COUNT = 10;
 var MIN_ROOMS_COUNT = 1;
@@ -65,7 +60,19 @@ var PHOTOS = [
   'http://o0.github.io/assets/images/tokyo/hotel3.jpg'
 ];
 
-var adverts = [];
+var FileType = {
+  PNG: '.png',
+};
+
+var locale = {
+  offerType: {
+    flat: 'Квартира',
+    bungalo: 'Бунгало',
+    house: 'Дом',
+    palace: 'Дворец'
+  }
+};
+
 
 var shuffleArray = function (array) {
   for (var i = array.length - 1; i > 0; i--) {
@@ -82,30 +89,86 @@ var getRandomInteger = function (minValue, maxValue) {
   return Math.round(Math.random() * (maxValue - minValue)) + minValue;
 };
 
-var getRandomElement = function (array) {
+var getRandomArrayItem = function (array) {
   return array[getRandomInteger(0, array.length - 1)];
 };
 
-var OfferType = {
-  flat: 'Квартира',
-  bungalo: 'Бунгало',
-  house: 'Дом',
-  palace: 'Дворец'
+var sliceArrayRandomly = function (array) {
+  return array.slice(0, getRandomInteger(1, array.length - 1));
 };
 
-var renderMapPin = function (mapPin) {
+var createPinElement = function (mapPin) {
   var mapPinElement = mapPinTemplate.cloneNode(true);
 
   mapPinElement.style =
-    'left: ' + (mapPin.location.x - MAP_PIN_X_OFFSET) + 'px;top: ' +
-    (mapPin.location.y - MAP_PIN_Y_OFFSET) + 'px;';
+    'left: ' + (mapPin.location.x - MAP_PIN_X_OFFSET) + 'px;' +
+    'top: ' + (mapPin.location.y - MAP_PIN_Y_OFFSET) + 'px;';
   mapPinElement.querySelector('img').src = mapPin.author.avatar;
   mapPinElement.querySelector('img').alt = mapPin.offer.title;
 
   return mapPinElement;
 };
 
-var renderFeatures = function (listFeatures) {
+var createMapPinFragment = function (array) {
+  var fragment = document.createDocumentFragment();
+  for (var i = 0; i < array.length; i++) {
+    fragment.appendChild(createPinElement(array[i]));
+  }
+
+  return fragment;
+};
+
+var generateAdverts = function (count) {
+
+  var avatarIndexes = [];
+  for (var i = 1; i <= AVATARS_COUNT; i++) {
+    if (i < 10) {
+      avatarIndexes.push('0' + i);
+      continue;
+    }
+    avatarIndexes.push('' + i);
+  }
+
+  var shuffledAvatarIndexes = shuffleArray(avatarIndexes);
+
+  var offerTitles = shuffleArray(OFFER_TITLES);
+
+  var adverts = [];
+  for (i = 0; i < count; i++) {
+    var locationX = getRandomInteger(MIN_LOCATION_X, MAX_LOCATION_X);
+    var locationY = getRandomInteger(MIN_LOCATION_Y, MAX_LOCATION_Y);
+    var advert = {
+      author: {
+        avatar: AVATAR_FOLDER_PATH + shuffledAvatarIndexes[i] + FileType.PNG
+      },
+
+      offer: {
+        title: offerTitles[i],
+        address: locationX + ', ' + locationY,
+        price: getRandomInteger(MIN_PRICE, MAX_PRICE),
+        type: getRandomArrayItem(OFFER_TYPES),
+        rooms: getRandomInteger(MIN_ROOMS_COUNT, MAX_ROOMS_COUNT),
+        guests: getRandomInteger(MIN_GUESTS_COUNT, MAX_GUESTS_COUNT),
+        checkin: getRandomArrayItem(CHECK_TIMES),
+        checkout: getRandomArrayItem(CHECK_TIMES),
+        features: sliceArrayRandomly(shuffleArray(FEATURES)),
+        description: '',
+        photos: shuffleArray(PHOTOS)
+      },
+
+      location: {
+        x: locationX,
+        y: locationY
+      }
+    };
+
+    adverts.push(advert);
+  }
+
+  return adverts;
+};
+
+var createFeatureElements = function (listFeatures) {
   var featuresFragment = document.createDocumentFragment();
 
   for (var i = 0; i < listFeatures.length; i++) {
@@ -118,7 +181,7 @@ var renderFeatures = function (listFeatures) {
   return featuresFragment;
 };
 
-var renderPhotos = function (listPhotos) {
+var createPhotoElements = function (listPhotos) {
   var photosFragment = document.createDocumentFragment();
 
   for (var i = 0; i < listPhotos.length; i++) {
@@ -130,13 +193,13 @@ var renderPhotos = function (listPhotos) {
   return photosFragment;
 };
 
-var renderMapCard = function (mapCard) {
+var createMapCardElement = function (mapCard) {
   var mapCardElement = mapCardTemplate.cloneNode(true);
 
   mapCardElement.querySelector('.popup__title').textContent = mapCard.offer.title;
   mapCardElement.querySelector('.popup__text--address').textContent = mapCard.offer.address;
   mapCardElement.querySelector('.popup__text--price').textContent = mapCard.offer.price + PRICE_TEXT;
-  mapCardElement.querySelector('.popup__type').textContent = OfferType[mapCard.offer.type];
+  mapCardElement.querySelector('.popup__type').textContent = locale.offerType[mapCard.offer.type];
   mapCardElement.querySelector('.popup__text--capacity').textContent =
     mapCard.offer.rooms + CAPACITY_ROOMS_TEXT +
     mapCard.offer.guests + CAPACITY_GUESTS_TEXT;
@@ -144,58 +207,16 @@ var renderMapCard = function (mapCard) {
     CHECKIN_TEXT + mapCard.offer.checkin +
     CHECKOUT_TEXT + mapCard.offer.checkout;
   mapCardElement.querySelector('.popup__features').innerHTML = '';
-  mapCardElement.querySelector('.popup__features').appendChild(renderFeatures(mapCard.offer.features));
+  mapCardElement.querySelector('.popup__features').appendChild(createFeatureElements(mapCard.offer.features));
   mapCardElement.querySelector('.popup__description').textContent = mapCard.offer.description;
   mapCardElement.querySelector('.popup__photos').innerHTML = '';
-  mapCardElement.querySelector('.popup__photos').appendChild(renderPhotos(mapCard.offer.photos));
+  mapCardElement.querySelector('.popup__photos').appendChild(createPhotoElements(mapCard.offer.photos));
   mapCardElement.querySelector('.popup__avatar').src = mapCard.author.avatar;
 
   return mapCardElement;
 };
 
-var avatarIndexes = [];
-for (var i = 1; i <= AVATARS_COUNT; i++) {
-  if (i < 10) {
-    avatarIndexes.push('0' + i);
-    continue;
-  }
-  avatarIndexes.push('' + i);
-}
-
-avatarIndexes = shuffleArray(avatarIndexes);
-
-var offerTitles = shuffleArray(OFFER_TITLES);
-
-for (i = 0; i < ADVERTS_COUNT; i++) {
-  var locationX = getRandomInteger(MIN_LOCATION_X, MAX_LOCATION_X);
-  var locationY = getRandomInteger(MIN_LOCATION_Y, MAX_LOCATION_Y);
-  var advert = {
-    author: {
-      avatar: AVATAR.FILE_PATH + avatarIndexes[i] + AVATAR.FILE_TYPE.PNG
-    },
-
-    offer: {
-      title: offerTitles[i],
-      address: locationX + ', ' + locationY,
-      price: getRandomInteger(MIN_PRICE, MAX_PRICE),
-      type: getRandomElement(OFFER_TYPES),
-      rooms: getRandomInteger(MIN_ROOMS_COUNT, MAX_ROOMS_COUNT),
-      guests: getRandomInteger(MIN_GUESTS_COUNT, MAX_GUESTS_COUNT),
-      checkin: getRandomElement(CHECK_TIMES),
-      checkout: getRandomElement(CHECK_TIMES),
-      features: shuffleArray(FEATURES).slice(0, getRandomInteger(1, FEATURES.length - 1)),
-      description: '',
-      photos: shuffleArray(PHOTOS)
-    },
-
-    location: {
-      x: locationX,
-      y: locationY
-    }
-  };
-
-  adverts.push(advert);
-}
+var adverts = generateAdverts(ADVERTS_COUNT);
 
 var mapElement = document.querySelector('.map');
 mapElement.classList.remove('map--faded');
@@ -213,16 +234,10 @@ var popupPhotoTemplate = document.querySelector('template')
     .querySelector('.popup__photo');
 
 var mapPinsElement = document.querySelector('.map__pins');
-var mapCardElement = document.querySelector('.map__filters-container');
-var mapPinFragment = document.createDocumentFragment();
-
-for (i = 0; i < adverts.length; i++) {
-  mapPinFragment.appendChild(renderMapPin(adverts[i]));
-}
-
+var mapPinFragment = createMapPinFragment(adverts);
 mapPinsElement.appendChild(mapPinFragment);
 
-var fragmentMapCard = document.createDocumentFragment();
-
-fragmentMapCard.appendChild(renderMapCard(adverts[0]));
-mapElement.insertBefore(fragmentMapCard, mapCardElement);
+var mapCardElement = document.querySelector('.map__filters-container');
+var mapCardFragment = document.createDocumentFragment();
+mapCardFragment.appendChild(createMapCardElement(adverts[0]));
+mapElement.insertBefore(mapCardFragment, mapCardElement);
