@@ -3,8 +3,11 @@
 var ADVERTS_COUNT = 8;
 var AVATAR_FOLDER_PATH = 'img/avatars/user';
 var AVATAR_FILE_TYPE = '.png';
-var PHOTO_WIDTH = 45;
-var PHOTO_HEIGHT = 40;
+
+var photoSize = {
+  WIDTH: 45,
+  HEIGTH: 40
+};
 
 var offerParams = {
   TITLES: [
@@ -47,8 +50,8 @@ var offerParams = {
   ],
 
   guestsCount: {
-    MIN: 5,
-    MAX: 10
+    MIN: 1,
+    MAX: 200
   },
 
   roomsCount: {
@@ -73,12 +76,12 @@ var locationParams = {
   }
 };
 
-var mapPinOffset = {
-  X: 25,
-  Y: 70
+var mapPinSize = {
+  WIDTH: 50,
+  HEIGHT: 70
 };
 
-var offerType = {
+var OfferTypesDict = {
   flat: 'Квартира',
   bungalo: 'Бунгало',
   house: 'Дом',
@@ -86,8 +89,8 @@ var offerType = {
 };
 
 /**
- * shuffleArray - расположение элементов массива в случайном порядке.
- * @param {Array.<string>} array - массив в котором нужно изменить порядок элементов на случайный.
+ * расположение элементов массива в случайном порядке.
+ * @param {Array} array - массив в котором нужно изменить порядок элементов на случайный.
  * @return {Array}
  */
 var shuffleArray = function (array) {
@@ -102,7 +105,7 @@ var shuffleArray = function (array) {
 };
 
 /**
- * getRandomInteger - генерация случайного числа в указанном диапазоне.
+ * генерация случайного числа в указанном диапазоне.
  * @param {number} minValue - миниальное значение из диапазона.
  * @param {number} maxValue - максимальное значение из диапазона.
  * @return {number}
@@ -112,17 +115,17 @@ var getRandomInteger = function (minValue, maxValue) {
 };
 
 /**
- * getRandomArrayItem - получение случайного элемента массива.
- * @param {Array.<String>} array - массив из которого нужно получить случайный элемент.
- * @return {String}
+ * получение случайного элемента массива.
+ * @param {Array} array - массив из которого нужно получить случайный элемент.
+ * @return {*}
  */
 var getRandomArrayItem = function (array) {
   return array[getRandomInteger(0, array.length - 1)];
 };
 
 /**
- * sliceArrayRandomly - получение случайного количества элементов массива.
- * @param {Array.<String>} array - массив, из которого нужно взять элементы.
+ * получение случайного количества элементов массива.
+ * @param {Array} array - массив, из которого нужно взять элементы.
  * @return {Array}
  */
 var sliceArrayRandomly = function (array) {
@@ -132,15 +135,36 @@ var sliceArrayRandomly = function (array) {
 var template = document.querySelector('template').content;
 
 /**
- * createPinElement - создание DOM элемента для метки на карте
- * @param {Object} mapPin - объект с параметрами метки на карте
+ * @typedef {Object} Advert - объект с параметрами карточки объявления.
+ * @param {Object} author - объект с данными автора объявления.
+ * @param {string} author.avatar - путь к  фото автора.
+ * @param {Object} offer - объект с данными о предложении.
+ * @param {string} offer.title - заголовок предложения.
+ * @param {string} offer.address - адрес предложения.
+ * @param {number} offer.price - цена предложения.
+ * @param {string} offer.type - тип предложения.
+ * @param {number} offer.rooms - количество комнат.
+ * @param {number} offer.guests - максимальное количество гостей.
+ * @param {string} offer.checkin - время заезда.
+ * @param {string} offer.checkout - время выезда.
+ * @param {Array.<string>} offer.features - массив со списком удобств.
+ * @param {string} offer.description - описание.
+ * @param {Array.<string>} offer.photos - массив с путями к фотографиям предложения.
+ * @param {Object} location - объекс с координами метки предложения на карте.
+ * @param {number} location.x - x координата метки предложения на карте.
+ * @param {number} location.y - y координата метки предложения на карте.
+ */
+
+/**
+ * создание DOM элемента для метки на карте
+ * @param {Advert} mapPin - объект с параметрами метки на карте
  * @return {Node}
  */
 var createPinElement = function (mapPin) {
   var mapPinElement = template.querySelector('.map__pin').cloneNode(true);
 
-  mapPinElement.style.left = (mapPin.location.x - mapPinOffset.X) + 'px';
-  mapPinElement.style.top = (mapPin.location.y - mapPinOffset.Y).toString() + 'px';
+  mapPinElement.style.left = (mapPin.location.x - mapPinSize.WIDTH / 2) + 'px';
+  mapPinElement.style.top = (mapPin.location.y - mapPinSize.HEIGHT).toString() + 'px';
   mapPinElement.querySelector('img').src = mapPin.author.avatar;
   mapPinElement.querySelector('img').alt = mapPin.offer.title;
 
@@ -148,8 +172,8 @@ var createPinElement = function (mapPin) {
 };
 
 /**
- * createMapPinFragment - создание фрагмента содержащего метки на карте.
- * @param {Array.<HTMLElement>} array - массив с параметрами меток на карте.
+ * создание фрагмента содержащего метки на карте.
+ * @param {Array.<Node>} array - массив с параметрами меток на карте.
  * @return {Node}
  */
 var createMapPinFragment = function (array) {
@@ -162,26 +186,26 @@ var createMapPinFragment = function (array) {
 };
 
 /**
- * getAvatarPath - получение пути к файлу аватара по индексу.
+ * получение пути к файлу аватара по индексу.
  * @param {number} index - индекс аватара.
  * @return {string}
  */
 var getAvatarPath = function (index) {
-  var avatarIndex = index < 10 ? '0' + (index + 1) : '' + (index + 1);
+  var avatarIndex = index < 10 ? '0' + index : '' + index;
   return AVATAR_FOLDER_PATH + avatarIndex + AVATAR_FILE_TYPE;
 };
 
 /**
- * generateAdvertItem - генерация случайного объявления.
+ * генерация случайного объявления.
  * @param {number} index - индекс объявления.
- * @return {Object}
+ * @return {Advert}
  */
 var generateAdvertItem = function (index) {
   var locationX = getRandomInteger(locationParams.x.MIN, locationParams.x.MAX);
   var locationY = getRandomInteger(locationParams.y.MIN, locationParams.y.MAX);
   var advert = {
     author: {
-      avatar: getAvatarPath(index)
+      avatar: getAvatarPath(index + 1)
     },
     offer: {
       title: offerParams.TITLES[index],
@@ -189,7 +213,7 @@ var generateAdvertItem = function (index) {
       price: getRandomInteger(offerParams.priceParams.MIN, offerParams.priceParams.MAX),
       type: getRandomArrayItem(offerParams.TYPES),
       rooms: getRandomInteger(offerParams.roomsCount.MIN, offerParams.roomsCount.MAX),
-      guests: getRandomInteger(offerParams.guestsCount.MIN, offerParams.guestsCount.MIN),
+      guests: getRandomInteger(offerParams.guestsCount.MIN, offerParams.guestsCount.MAX),
       checkin: getRandomArrayItem(offerParams.CHECK_TIMES),
       checkout: getRandomArrayItem(offerParams.CHECK_TIMES),
       features: sliceArrayRandomly(shuffleArray(offerParams.FEATURES)),
@@ -206,9 +230,9 @@ var generateAdvertItem = function (index) {
 };
 
 /**
- * generateAdverts - генерация массива случайных элементов.
+ * генерация массива случайных элементов.
  * @param {number} count - количество объявлений.
- * @return {Array.<Object>}
+ * @return {Array.<Advert>}
  */
 var generateAdverts = function (count) {
 
@@ -221,9 +245,9 @@ var generateAdverts = function (count) {
 };
 
 /**
- * createFeatureElement - создание элемента из списка удобств в объявлении.
+ * создание элемента из списка удобств в объявлении.
  * @param {string} feature - название удобства
- * @return {HTMLElement}
+ * @return {Node}
  */
 var createFeatureElement = function (feature) {
   var listItemElement = document.createElement('li');
@@ -234,54 +258,43 @@ var createFeatureElement = function (feature) {
 };
 
 /**
- * createFeatureFragment - создание списка удобств.
- * @param {Array.<HTMLElement>} listFeatures - массив с удобствами.
- * @return {HTMLElement}
- */
-var createFeatureFragment = function (listFeatures) {
-  var featuresFragment = document.createDocumentFragment();
-
-  for (var i = 0; i < listFeatures.length; i++) {
-    featuresFragment.appendChild(createFeatureElement(listFeatures[i]));
-  }
-
-  return featuresFragment;
-};
-
-/**
- * createPhotoElement - создание элемента с фотографией в объявлении
+ * создание элемента с фотографией в объявлении
  * @param {string} src - путь к файлу
- * @return {HTMLElement}
+ * @return {Node}
  */
 var createPhotoElement = function (src) {
   var photoElement = document.createElement('img');
   photoElement.classList.add('popup__photo');
-  photoElement.width = PHOTO_WIDTH;
-  photoElement.height = PHOTO_HEIGHT;
+  photoElement.width = photoSize.WIDTH;
+  photoElement.height = photoSize.HEIGHT;
   photoElement.alt = 'Фотография жилья';
   photoElement.src = src;
   return photoElement;
 };
 
 /**
- * createPhotosFragment - создание фрагмента, содержащего фотографии в объявлении
- * @param {Array.<HTMLElement>} listPhotos - массив с элементами содержащими фотографии
- * @return {HTMLElement}
+ * определение правльной формы множенственного числа существительного
+ * @param {Array.<string>} options - массив с вариантами существительного во множественном числе.
+ * @param {number} number - число которому должна соотвествовать форма существительного.
+ * @return {string}
  */
-var createPhotosFragment = function (listPhotos) {
-  var photosFragment = document.createDocumentFragment();
-
-  for (var i = 0; i < listPhotos.length; i++) {
-    photosFragment.appendChild(createPhotoElement(listPhotos[i]));
+var getInclineNoun = function (options, number) {
+  if (number % 100 >= 5 && number % 100 <= 20) {
+    return options[2];
   }
-
-  return photosFragment;
+  if (number % 10 === 1) {
+    return options[0];
+  } else if (number % 10 >= 2 && number % 10 <= 4) {
+    return options[1];
+  } else {
+    return options[2];
+  }
 };
 
 /**
- * createMapCardElement - создание карточки объявления на карте
- * @param {Object} advert - объект с параметрами карточки объявления
- * @return {HTMLElement}
+ * создание карточки объявления на карте
+ * @param {Advert} advert - объект с параметрами карточки объявления
+ * @return {Node}
  */
 var createMapCardElement = function (advert) {
   var mapCardElement = template.querySelector('.map__card').cloneNode(true);
@@ -289,16 +302,23 @@ var createMapCardElement = function (advert) {
   mapCardElement.querySelector('.popup__title').textContent = advert.offer.title;
   mapCardElement.querySelector('.popup__text--address').textContent = advert.offer.address;
   mapCardElement.querySelector('.popup__text--price').textContent = advert.offer.price + '₽/ночь';
-  mapCardElement.querySelector('.popup__type').textContent = offerType[advert.offer.type];
+  mapCardElement.querySelector('.popup__type').textContent = OfferTypesDict[advert.offer.type];
   mapCardElement.querySelector('.popup__text--capacity').textContent =
-    advert.offer.rooms + ' комнаты для ' +
-    advert.offer.guests + ' гостей';
+    // advert.offer.rooms + ' комнаты для ' +
+    advert.offer.rooms + ' ' + getInclineNoun(['комната', 'комнаты', 'комнат'], advert.offer.rooms) + ' для ' +
+    advert.offer.guests + ' ' + getInclineNoun(['гостя', 'гостей', 'гостей'], advert.offer.guests) + ' гостей';
   mapCardElement.querySelector('.popup__text--time').textContent =
     'Заезд после ' + advert.offer.checkin +
     ', выезд до ' + advert.offer.checkout;
-  mapCardElement.querySelector('.popup__features').appendChild(createFeatureFragment(advert.offer.features));
-  mapCardElement.querySelector('.popup__description').textContent = advert.offer.description;
-  mapCardElement.querySelector('.popup__photos').appendChild(createPhotosFragment(advert.offer.photos));
+
+  for (var i = 0; i < advert.offer.features.length; i++) {
+    mapCardElement.querySelector('.popup__features').appendChild((createFeatureElement(advert.offer.features[i])));
+  }
+
+  for (i = 0; i < advert.offer.photos.length; i++) {
+    mapCardElement.querySelector('.popup__photos').appendChild(createPhotoElement(advert.offer.photos[i]));
+  }
+
   mapCardElement.querySelector('.popup__avatar').src = advert.author.avatar;
 
   return mapCardElement;
@@ -308,13 +328,11 @@ var initMap = function () {
   var adverts = generateAdverts(ADVERTS_COUNT);
   var mapElement = document.querySelector('.map');
   mapElement.classList.remove('map--faded');
-  var mapPinsElement = document.querySelector('.map__pins');
+  var mapPinsElement = mapElement.querySelector('.map__pins');
   var mapPinFragment = createMapPinFragment(adverts);
   mapPinsElement.appendChild(mapPinFragment);
-  var mapCardElement = document.querySelector('.map__filters-container');
-  var mapCardFragment = document.createDocumentFragment();
-  mapCardFragment.appendChild(createMapCardElement(adverts[0]));
-  mapElement.insertBefore(mapCardFragment, mapCardElement);
+  var mapCardElement = mapElement.querySelector('.map__filters-container');
+  mapElement.insertBefore(createMapCardElement(adverts[0]), mapCardElement);
 };
 
 initMap();
