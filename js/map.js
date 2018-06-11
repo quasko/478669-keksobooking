@@ -89,6 +89,42 @@ var OfferTypesDict = {
 };
 
 /**
+ * @typedef {Object} Advert - объект с параметрами карточки объявления.
+ * @param {Author} author - объект с данными автора объявления.
+ * @param {Offer} offer - объект с данными о предложении.
+ * @param {Location} location - объекс с координами метки предложения на карте.
+ */
+
+/**
+ * @typedef {Object} Author - объект с данными автора объявления.
+ * @param {string} avatar - путь к  фото автора.
+ */
+
+/**
+  * @typedef {Object} Offer - объект с данными о предложении.
+  * @param {string} title - заголовок предложения.
+  * @param {string} address - адрес предложения.
+  * @param {number} price - цена предложения.
+  * @param {string} type - тип предложения.
+  * @param {number} rooms - количество комнат.
+  * @param {number} guests - максимальное количество гостей.
+  * @param {string} checkin - время заезда.
+  * @param {string} checkout - время выезда.
+  * @param {Array.<string>} features - массив со списком удобств.
+  * @param {string} description - описание.
+  * @param {Array.<string>} photos - массив с путями к фотографиям предложения.
+  */
+
+/**
+  * @typedef {Object} Location - объекс с координами метки предложения на карте.
+  * @param {number} x - x координата метки предложения на карте.
+  * @param {number} y - y координата метки предложения на карте.
+  */
+
+var template = document.querySelector('template').content;
+var mapElement = document.querySelector('.map');
+
+/**
  * расположение элементов массива в случайном порядке.
  * @param {Array} array - массив в котором нужно изменить порядок элементов на случайный.
  * @return {Array}
@@ -132,29 +168,6 @@ var sliceArrayRandomly = function (array) {
   return array.slice(0, getRandomInteger(1, array.length - 1));
 };
 
-var template = document.querySelector('template').content;
-
-/**
- * @typedef {Object} Advert - объект с параметрами карточки объявления.
- * @param {Object} author - объект с данными автора объявления.
- * @param {string} author.avatar - путь к  фото автора.
- * @param {Object} offer - объект с данными о предложении.
- * @param {string} offer.title - заголовок предложения.
- * @param {string} offer.address - адрес предложения.
- * @param {number} offer.price - цена предложения.
- * @param {string} offer.type - тип предложения.
- * @param {number} offer.rooms - количество комнат.
- * @param {number} offer.guests - максимальное количество гостей.
- * @param {string} offer.checkin - время заезда.
- * @param {string} offer.checkout - время выезда.
- * @param {Array.<string>} offer.features - массив со списком удобств.
- * @param {string} offer.description - описание.
- * @param {Array.<string>} offer.photos - массив с путями к фотографиям предложения.
- * @param {Object} location - объекс с координами метки предложения на карте.
- * @param {number} location.x - x координата метки предложения на карте.
- * @param {number} location.y - y координата метки предложения на карте.
- */
-
 /**
  * создание DOM элемента для метки на карте
  * @param {Advert} mapPin - объект с параметрами метки на карте
@@ -173,7 +186,7 @@ var createPinElement = function (mapPin) {
 
 /**
  * создание фрагмента содержащего метки на карте.
- * @param {Array.<Node>} array - массив с параметрами меток на карте.
+ * @param {Array.<Advert>} array - массив с параметрами меток на карте.
  * @return {Node}
  */
 var createMapPinFragment = function (array) {
@@ -273,10 +286,10 @@ var createPhotoElement = function (src) {
 };
 
 /**
- * определение правльной формы множенственного числа существительного
- * @param {Array.<string>} options - массив с вариантами существительного во множественном числе.
- * @param {number} number - число которому должна соотвествовать форма существительного.
- * @return {string}
+ * определение правильной формы множественного числа существительного
+ * @param {Array.<string>} options - массив с вариантами существительного во множественном числе, например ['комната', 'комнаты', 'комнат'].
+ * @param {number} number - число которому должна соотвествовать форма существительного, например 1 комната, 2 комнаты 5 комнат.
+ * @return {string} - например 1 'комната', 2 'комнаты' 5 'комнат'.
  */
 var getInclineNoun = function (options, number) {
   if (number % 100 >= 5 && number % 100 <= 20) {
@@ -304,20 +317,19 @@ var createMapCardElement = function (advert) {
   mapCardElement.querySelector('.popup__text--price').textContent = advert.offer.price + '₽/ночь';
   mapCardElement.querySelector('.popup__type').textContent = OfferTypesDict[advert.offer.type];
   mapCardElement.querySelector('.popup__text--capacity').textContent =
-    // advert.offer.rooms + ' комнаты для ' +
     advert.offer.rooms + ' ' + getInclineNoun(['комната', 'комнаты', 'комнат'], advert.offer.rooms) + ' для ' +
     advert.offer.guests + ' ' + getInclineNoun(['гостя', 'гостей', 'гостей'], advert.offer.guests) + ' гостей';
   mapCardElement.querySelector('.popup__text--time').textContent =
     'Заезд после ' + advert.offer.checkin +
     ', выезд до ' + advert.offer.checkout;
 
-  for (var i = 0; i < advert.offer.features.length; i++) {
-    mapCardElement.querySelector('.popup__features').appendChild((createFeatureElement(advert.offer.features[i])));
-  }
+  advert.offer.features.forEach(function (item) {
+    mapCardElement.querySelector('.popup__features').appendChild((createFeatureElement(item)));
+  });
 
-  for (i = 0; i < advert.offer.photos.length; i++) {
-    mapCardElement.querySelector('.popup__photos').appendChild(createPhotoElement(advert.offer.photos[i]));
-  }
+  advert.offer.photos.forEach(function (item) {
+    mapCardElement.querySelector('.popup__photos').appendChild(createPhotoElement(item));
+  });
 
   mapCardElement.querySelector('.popup__avatar').src = advert.author.avatar;
 
@@ -326,7 +338,6 @@ var createMapCardElement = function (advert) {
 
 var initMap = function () {
   var adverts = generateAdverts(ADVERTS_COUNT);
-  var mapElement = document.querySelector('.map');
   mapElement.classList.remove('map--faded');
   var mapPinsElement = mapElement.querySelector('.map__pins');
   var mapPinFragment = createMapPinFragment(adverts);
