@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Денис Пуховский](https://up.htmlacademy.ru/javascript/14/user/478669).
-* Наставник: [Константин Мельников](https://htmlacademy.ru/profile/id443359).
+* Наставник: [Олег Петров](https://htmlacademy.ru/profile/fyvfyv).
 
 ---
 
