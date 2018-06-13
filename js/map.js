@@ -10,7 +10,7 @@ var photoSize = {
 };
 
 var mapPinMainSize = {
-  inActive: {
+  inactive: {
     WIDTH: 65,
     HEIGHT: 65
   },
@@ -140,11 +140,20 @@ var mapElement = document.querySelector('.map');
 var mapPinMain = document.querySelector('.map__pin--main');
 var adForm = document.querySelector('.ad-form');
 var inputAddress = document.querySelector('#address');
-
 var fieldsets = document.querySelectorAll('.ad-form > fieldset');
-fieldsets.forEach(function (item) {
-  item.disabled = true;
-});
+
+var mapFilter = document.querySelector('.map__filters-container');
+var mapPinsElement = mapElement.querySelector('.map__pins');
+
+/**
+ * активация/блокировка элементов формы
+ * @param {boolean} state - состояние атрибута disabled
+ */
+var disableFieldsets = function (state) {
+  fieldsets.forEach(function (item) {
+    item.disabled = state;
+  });
+};
 
 /**
  * расположение элементов массива в случайном порядке.
@@ -202,6 +211,26 @@ var createPinElement = function (mapPin) {
   mapPinElement.style.top = (mapPin.location.y - mapPinSize.HEIGHT).toString() + 'px';
   mapPinElement.querySelector('img').src = mapPin.author.avatar;
   mapPinElement.querySelector('img').alt = mapPin.offer.title;
+
+  mapPinElement.addEventListener('click', function () {
+    var newCard = createMapCardElement(mapPin);
+    var currentCard = document.querySelector('.map__card');
+
+    if (currentCard) {
+      if (currentCard === newCard) {
+        return;
+      } else {
+        currentCard.remove();
+        mapElement.insertBefore(newCard, mapFilter);
+      }
+    } else {
+      mapElement.insertBefore(newCard, mapFilter);
+    }
+
+    var closeButton = newCard.querySelector('.popup__close');
+    closeButton.addEventListener('click', closePopup);
+    document.addEventListener('keydown', popupEscPressHandler);
+  });
 
   return mapPinElement;
 };
@@ -358,19 +387,11 @@ var createMapCardElement = function (advert) {
   return mapCardElement;
 };
 
-/**
- * закрытие карточки объявления
- */
 var closePopup = function () {
-  var mapCard = document.querySelector('.map__card');
-  mapCard.remove();
+  document.querySelector('.map__card').remove();
   document.removeEventListener('keydown', popupEscPressHandler);
 };
 
-/**
- * обработчик нажатия ESC
- * @param {KeyboardsEvent} evt
- */
 var popupEscPressHandler = function (evt) {
   if (evt.keyCode === ESC_KEYCODE) {
     closePopup();
@@ -383,65 +404,37 @@ var popupEscPressHandler = function (evt) {
 var initMap = function () {
   var adverts = generateAdverts(ADVERTS_COUNT);
   mapElement.classList.remove('map--faded');
-  var mapPinsElement = mapElement.querySelector('.map__pins');
   var mapPinFragment = createMapPinFragment(adverts);
   mapPinsElement.appendChild(mapPinFragment);
-  var mapCardElement = mapElement.querySelector('.map__filters-container');
-  var mapPins = mapPinsElement.querySelectorAll('.map__pin:not(.map__pin--main)');
-
-  for (var i = 0; i < mapPins.length; i++) {
-    mapPins[i].addEventListener('click', function (evt) {
-      for (i = 0; i < mapPins.length; i++) {
-        if (mapPins[i] === evt.currentTarget) {
-          var mapCard = document.querySelector('.map__card');
-          if (mapCard) {
-            mapCard.remove();
-          }
-          var newMapCard = mapElement.insertBefore(createMapCardElement(adverts[i]), mapCardElement);
-          var closeButton = newMapCard.querySelector('.popup__close');
-          closeButton.addEventListener('click', closePopup);
-          document.addEventListener('keydown', popupEscPressHandler);
-        }
-      }
-    });
-  }
 };
 
 /**
- * установка значения в поле Адрес
- * @param {number} x - координата X объявления
- * @param {number} y - координата Y объявления
+ * установка значения в поле Адрес в зависимости от состояния mainPin
+ * @param {string} mainPinState - состояние mainPin
  */
-var setAddress = function (x, y) {
-  inputAddress.value = x + ', ' + y;
+var setAddress = function (mainPinState) {
+  var addressX = Math.round(mapPinMain.offsetLeft + mapPinMainSize[mainPinState].WIDTH / 2);
+  var addressY = mainPinState === 'active' ? Math.round(mapPinMain.offsetTop + mapPinMainSize.active.HEIGHT)
+    : Math.round(mapPinMain.offsetTop + mapPinMainSize.inactive.HEIGHT / 2);
+  inputAddress.value = addressX + ', ' + addressY;
 };
 
 /**
- * перевод станицы в активное состояние
+ * перевод формы в активное состояние
  */
-var setActivePageState = function () {
+var initForm = function () {
   adForm.classList.remove('ad-form--disabled');
-  fieldsets.forEach(function (item) {
-    item.disabled = false;
-  });
+  disableFieldsets(false);
+};
+
+var mainPinHandler = function () {
   initMap();
+  initForm();
+  setAddress('active');
+  mapPinMain.removeEventListener('mouseup', mainPinHandler);
 };
 
-/**
- * обработчик события mouseup
- */
-var mapPinMainMouseupHandler = function () {
-  setActivePageState();
-  var addressX = Math.round(mapPinMain.offsetLeft + mapPinMainSize.active.WIDTH / 2);
-  var addressY = Math.round(mapPinMain.offsetTop + mapPinMainSize.active.HEIGHT);
-  setAddress(addressX, addressY);
-  mapPinMain.removeEventListener('mouseup', mapPinMainMouseupHandler);
-};
-
-mapPinMain.addEventListener('mouseup', mapPinMainMouseupHandler);
-
-var addressX = Math.round(mapPinMain.offsetLeft + mapPinMainSize.inActive.WIDTH / 2);
-var addressY = Math.round(mapPinMain.offsetTop + mapPinMainSize.inActive.HEIGHT / 2);
-setAddress(addressX, addressY);
+mapPinMain.addEventListener('mouseup', mainPinHandler);
+setAddress('inactive');
 
 
