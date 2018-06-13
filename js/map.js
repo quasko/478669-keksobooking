@@ -9,6 +9,18 @@ var photoSize = {
   HEIGTH: 40
 };
 
+var mapPinMainSize = {
+  inActive: {
+    WIDTH: 65,
+    HEIGHT: 65
+  },
+
+  active: {
+    WIDTH: 65,
+    HEIGHT: 77
+  }
+};
+
 var offerParams = {
   TITLES: [
     'Большая уютная квартира',
@@ -88,6 +100,8 @@ var OfferTypesDict = {
   palace: 'Дворец'
 };
 
+var ESC_KEYCODE = 27;
+
 /**
  * @typedef {Object} Advert - объект с параметрами карточки объявления.
  * @param {Author} author - объект с данными автора объявления.
@@ -123,6 +137,14 @@ var OfferTypesDict = {
 
 var template = document.querySelector('template').content;
 var mapElement = document.querySelector('.map');
+var mapPinMain = document.querySelector('.map__pin--main');
+var adForm = document.querySelector('.ad-form');
+var inputAddress = document.querySelector('#address');
+
+var fieldsets = document.querySelectorAll('.ad-form > fieldset');
+fieldsets.forEach(function (item) {
+  item.disabled = true;
+});
 
 /**
  * расположение элементов массива в случайном порядке.
@@ -336,6 +358,28 @@ var createMapCardElement = function (advert) {
   return mapCardElement;
 };
 
+/**
+ * закрытие карточки объявления
+ */
+var closePopup = function () {
+  var mapCard = document.querySelector('.map__card');
+  mapCard.remove();
+  document.removeEventListener('keydown', popupEscPressHandler);
+};
+
+/**
+ * обработчик нажатия ESC
+ * @param {KeyboardsEvent} evt
+ */
+var popupEscPressHandler = function (evt) {
+  if (evt.keyCode === ESC_KEYCODE) {
+    closePopup();
+  }
+};
+
+/**
+ * перевод карты в активное состояние
+ */
 var initMap = function () {
   var adverts = generateAdverts(ADVERTS_COUNT);
   mapElement.classList.remove('map--faded');
@@ -343,7 +387,61 @@ var initMap = function () {
   var mapPinFragment = createMapPinFragment(adverts);
   mapPinsElement.appendChild(mapPinFragment);
   var mapCardElement = mapElement.querySelector('.map__filters-container');
-  mapElement.insertBefore(createMapCardElement(adverts[0]), mapCardElement);
+  var mapPins = mapPinsElement.querySelectorAll('.map__pin:not(.map__pin--main)');
+
+  for (var i = 0; i < mapPins.length; i++) {
+    mapPins[i].addEventListener('click', function (evt) {
+      for (i = 0; i < mapPins.length; i++) {
+        if (mapPins[i] === evt.currentTarget) {
+          var mapCard = document.querySelector('.map__card');
+          if (mapCard) {
+            mapCard.remove();
+          }
+          var newMapCard = mapElement.insertBefore(createMapCardElement(adverts[i]), mapCardElement);
+          var closeButton = newMapCard.querySelector('.popup__close');
+          closeButton.addEventListener('click', closePopup);
+          document.addEventListener('keydown', popupEscPressHandler);
+        }
+      }
+    });
+  }
 };
 
-initMap();
+/**
+ * установка значения в поле Адрес
+ * @param {number} x - координата X объявления
+ * @param {number} y - координата Y объявления
+ */
+var setAddress = function (x, y) {
+  inputAddress.value = x + ', ' + y;
+};
+
+/**
+ * перевод станицы в активное состояние
+ */
+var setActivePageState = function () {
+  adForm.classList.remove('ad-form--disabled');
+  fieldsets.forEach(function (item) {
+    item.disabled = false;
+  });
+  initMap();
+};
+
+/**
+ * обработчик события mouseup
+ */
+var mapPinMainMouseupHandler = function () {
+  setActivePageState();
+  var addressX = Math.round(mapPinMain.offsetLeft + mapPinMainSize.active.WIDTH / 2);
+  var addressY = Math.round(mapPinMain.offsetTop + mapPinMainSize.active.HEIGHT);
+  setAddress(addressX, addressY);
+  mapPinMain.removeEventListener('mouseup', mapPinMainMouseupHandler);
+};
+
+mapPinMain.addEventListener('mouseup', mapPinMainMouseupHandler);
+
+var addressX = Math.round(mapPinMain.offsetLeft + mapPinMainSize.inActive.WIDTH / 2);
+var addressY = Math.round(mapPinMain.offsetTop + mapPinMainSize.inActive.HEIGHT / 2);
+setAddress(addressX, addressY);
+
+
