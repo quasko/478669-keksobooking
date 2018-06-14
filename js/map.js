@@ -137,23 +137,29 @@ var ESC_KEYCODE = 27;
 
 var template = document.querySelector('template').content;
 var mapElement = document.querySelector('.map');
-// var mapPinMain = document.querySelector('.map__pin--main');
 var mainPin = document.querySelector('.map__pin--main');
-
 var adForm = document.querySelector('.ad-form');
 var inputAddress = document.querySelector('#address');
 var fieldsets = document.querySelectorAll('.ad-form > fieldset');
-
 var mapFilter = document.querySelector('.map__filters-container');
 var mapPinsElement = mapElement.querySelector('.map__pins');
 
-var active = {
-  pin: '',
-  card: '',
-  remove: function () {
-    this.pin = '';
+var mapOffersStatus = {
+  pin: null,
+  card: null,
+  deactivateCard: function () {
     this.card.remove();
-    this.card = '';
+    this.card = null;
+  },
+  deactivatePin: function () {
+    if (this.pin) {
+      this.pin.classList.remove('map__pin--active');
+      this.pin = null;
+    }
+  },
+  activatePin: function (pin) {
+    this.pin = pin;
+    this.pin.classList.add('map__pin--active');
   }
 };
 
@@ -210,15 +216,15 @@ var sliceArrayRandomly = function (array) {
   return array.slice(0, getRandomInteger(1, array.length - 1));
 };
 
-
 /**
  * вставка карточки объявления в DOM
  * @param {Node} card - карточка объявления
- * @param {Node} pin - активная метка на карте
  */
-var renderCard = function (card, pin) {
-  active.pin = pin;
-  active.card = card;
+var renderCard = function (card) {
+  if (mapOffersStatus.card) {
+    mapOffersStatus.deactivateCard();
+  }
+  mapOffersStatus.card = card;
   mapElement.insertBefore(card, mapFilter);
 };
 
@@ -236,13 +242,14 @@ var createPinElement = function (mapPin) {
   mapPinElement.querySelector('img').alt = mapPin.offer.title;
 
   mapPinElement.addEventListener('click', function (evt) {
-    var newCard = createMapCardElement(mapPin);
-    if (active.card && active.pin === evt.target) {
-      return;
-    } else if (active.card && active.pin !== evt.target) {
-      active.card.remove();
+
+    if (mapOffersStatus.pin !== evt.currentTarget) {
+      mapOffersStatus.deactivatePin();
+      mapOffersStatus.activatePin(evt.currentTarget);
+
+      var newCard = createMapCardElement(mapPin);
+      renderCard(newCard);
     }
-    renderCard(newCard, evt.target);
   });
 
   return mapPinElement;
@@ -312,7 +319,6 @@ var generateAdvertItem = function (index) {
  * @return {Array.<Advert>}
  */
 var generateAdverts = function (count) {
-
   var adverts = [];
   for (var i = 0; i < count; i++) {
     adverts.push(generateAdvertItem(i));
@@ -405,7 +411,8 @@ var createMapCardElement = function (advert) {
 };
 
 var closePopup = function () {
-  active.remove();
+  mapOffersStatus.deactivateCard();
+  mapOffersStatus.deactivatePin();
   document.removeEventListener('keydown', popupEscPressHandler);
 };
 
@@ -434,15 +441,17 @@ var getMainPinAddress = function () {
   var addressX = Math.round(mainPin.offsetLeft + mainPinSize[state].WIDTH / 2);
   var addressY = state === 'active' ? Math.round(mainPin.offsetTop + mainPinSize.active.HEIGHT)
     : Math.round(mainPin.offsetTop + mainPinSize.inactive.HEIGHT / 2);
-  return addressX + ', ' + addressY;
-};
 
+  return {x: addressX, y: addressY};
+};
 
 /**
  * установка значения в поле Адрес
+ * @param {number} x - x координата
+ * @param {number} y - y координата
  */
-var setAddress = function () {
-  inputAddress.value = getMainPinAddress();
+var setAddress = function (x, y) {
+  inputAddress.value = x + ', ' + y;
 };
 
 /**
@@ -456,11 +465,9 @@ var initForm = function () {
 var mainPinHandler = function () {
   initMap();
   initForm();
-  setAddress();
+  setAddress(getMainPinAddress().x, getMainPinAddress().y);
   mainPin.removeEventListener('mouseup', mainPinHandler);
 };
 
 mainPin.addEventListener('mouseup', mainPinHandler);
-setAddress();
-
-
+setAddress(getMainPinAddress().x, getMainPinAddress().y);
