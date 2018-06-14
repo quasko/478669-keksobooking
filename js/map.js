@@ -154,9 +154,6 @@ var mapOffersStatus = {
     this.card.remove();
     this.card = null;
   },
-  checkPin: function () {
-    return this.pin ? true : false;
-  },
   deactivatePin: function () {
     if (this.pin) {
       this.pin.classList.remove('map__pin--active');
@@ -248,8 +245,7 @@ var createPinElement = function (mapPin) {
   mapPinElement.querySelector('img').alt = mapPin.offer.title;
 
   mapPinElement.addEventListener('click', function (evt) {
-
-    if (mapOffersStatus.pin !== evt.currentTarget) {
+    if (!evt.currentTarget.classList.contains('map__pin--active')) {
       mapOffersStatus.deactivatePin();
       mapOffersStatus.activatePin(evt.currentTarget);
 
@@ -439,25 +435,33 @@ var initMap = function () {
 };
 
 /**
+ * @typedef {Object} Coordinates - координаты метки mainPin
+ * @param {number} x - координата X
+ * @param {number} y - координата Y
+ */
+
+/**
  * вычисление адреса метки mainPin на карте
- * @return {string}
+ * @return {Coordinates}
  */
 var getMainPinAddress = function () {
   var state = mapElement.classList.contains('map--faded') ? 'active' : 'inactive';
   var addressX = Math.round(mainPin.offsetLeft + mainPinSize[state].WIDTH / 2);
   var addressY = state === 'active' ? Math.round(mainPin.offsetTop + mainPinSize.active.HEIGHT)
     : Math.round(mainPin.offsetTop + mainPinSize.inactive.HEIGHT / 2);
-
-  return {x: addressX, y: addressY};
+  var coord = {
+    x: addressX,
+    y: addressY
+  };
+  return coord;
 };
 
 /**
  * установка значения в поле Адрес
- * @param {number} x - x координата
- * @param {number} y - y координата
+ * @param {Coordinates} address - координаты
  */
-var setAddress = function (x, y) {
-  inputAddress.value = x + ', ' + y;
+var setAddress = function (address) {
+  inputAddress.value = address.x + ', ' + address.y;
 };
 
 /**
@@ -471,9 +475,9 @@ var initForm = function () {
 var mainPinHandler = function () {
   initMap();
   initForm();
-  setAddress(getMainPinAddress().x, getMainPinAddress().y);
+  setAddress(getMainPinAddress());
   mainPin.removeEventListener('mouseup', mainPinHandler);
 };
 
 mainPin.addEventListener('mouseup', mainPinHandler);
-setAddress(getMainPinAddress().x, getMainPinAddress().y);
+setAddress(getMainPinAddress());
