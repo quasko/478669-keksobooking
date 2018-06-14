@@ -147,9 +147,15 @@ var mapPinsElement = mapElement.querySelector('.map__pins');
 var mapOffersStatus = {
   pin: null,
   card: null,
+  checkCard: function () {
+    return this.card ? true : false;
+  },
   deactivateCard: function () {
     this.card.remove();
     this.card = null;
+  },
+  checkPin: function () {
+    return this.pin ? true : false;
   },
   deactivatePin: function () {
     if (this.pin) {
@@ -221,7 +227,7 @@ var sliceArrayRandomly = function (array) {
  * @param {Node} card - карточка объявления
  */
 var renderCard = function (card) {
-  if (mapOffersStatus.card) {
+  if (mapOffersStatus.checkCard()) {
     mapOffersStatus.deactivateCard();
   }
   mapOffersStatus.card = card;
