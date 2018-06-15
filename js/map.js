@@ -3,6 +3,8 @@
 var ADVERTS_COUNT = 8;
 var AVATAR_FOLDER_PATH = 'img/avatars/user';
 var AVATAR_FILE_TYPE = '.png';
+var ESC_KEYCODE = 27;
+var ROOMS_MAX_VALUE = 100;
 
 var photoSize = {
   WIDTH: 45,
@@ -93,6 +95,14 @@ var mapPinSize = {
   HEIGHT: 70
 };
 
+
+/**
+ * @typedef {Object} OfferTypesDict
+ * @param {string} flat
+ * @param {string} bungalo
+ * @param {string} house
+ * @param {string} palace
+ */
 var OfferTypesDict = {
   flat: 'Квартира',
   bungalo: 'Бунгало',
@@ -100,14 +110,19 @@ var OfferTypesDict = {
   palace: 'Дворец'
 };
 
-var MinPrice = {
+/**
+ * @typedef {Object} MinPrices
+ * @param {number} bungalo
+ * @param {number} flat
+ * @param {number} house
+ * @param {number} palace
+ */
+var MinPrices = {
   bungalo: 0,
   flat: 1000,
   house: 5000,
   palace: 1000000
 };
-
-var ESC_KEYCODE = 27;
 
 /**
  * @typedef {Object} Advert - объект с параметрами карточки объявления.
@@ -489,7 +504,7 @@ var resetMap = function () {
  * @return {Coordinates}
  */
 var getMainPinAddress = function () {
-  var state = mapElement.classList.contains('map--faded') ? 'active' : 'inactive';
+  var state = mapElement.classList.contains('map--faded') ? 'inactive' : 'active';
   var addressX = Math.round(mainPin.offsetLeft + mainPinSize[state].WIDTH / 2);
   var addressY = state === 'active' ? Math.round(mainPin.offsetTop + mainPinSize.active.HEIGHT)
     : Math.round(mainPin.offsetTop + mainPinSize.inactive.HEIGHT / 2);
@@ -538,7 +553,6 @@ resetButton.addEventListener('click', function () {
   initPage();
 });
 
-
 /**
  * Установка параметров поля "Цена за ночь"
  * @param {number} minPrice
@@ -549,40 +563,45 @@ var setPriceFieldParams = function (minPrice) {
 };
 
 typeField.addEventListener('change', function (evt) {
-  setPriceFieldParams(MinPrice[evt.target.value]);
+  setPriceFieldParams(MinPrices[evt.target.value]);
 });
 
-checkInField.addEventListener('change', function (evt) {
-  checkOutField.value = evt.target.value;
-});
 
-checkOutField.addEventListener('change', function (evt) {
-  checkInField.value = evt.target.value;
-});
+var timeFieldsHandler = function (evt) {
+  if (evt.target === checkInField) {
+    checkOutField.value = evt.target.value;
+  } else {
+    checkInField.value = evt.target.value;
+  }
+};
 
-roomsNumberField.addEventListener('change', function (evt) {
+checkInField.addEventListener('change', timeFieldsHandler);
+
+checkOutField.addEventListener('change', timeFieldsHandler);
+
+roomsNumberField.addEventListener('change', function () {
+  capacityField.value = roomsNumberField.value;
   var capacityOptions = capacityField.options;
-  capacityOptions[3].disabled = true;
-  var roomsValue = evt.target.value;
-  if (roomsValue === '100') {
+  var currentRoomsValue = parseInt(roomsNumberField.value, 10);
 
-    for (var i = 0; i < capacityOptions.length; i++) {
-      capacityOptions[i].disabled = true;
-      capacityOptions[i].selected = false;
-    }
-    capacityOptions[3].disabled = false;
-    capacityOptions[3].selected = true;
-    return;
-  }
-
-  for (i = 0; i < capacityOptions.length - 1; i++) {
-    if (roomsValue < capacityOptions[i].value) {
-      capacityOptions[i].disabled = true;
-    } else {
+  for (var i = 0; i < capacityOptions.length; i++) {
+    if (parseInt(capacityOptions[i].value, 10) <= currentRoomsValue) {
       capacityOptions[i].disabled = false;
-    }
-  }
 
+      if (currentRoomsValue === ROOMS_MAX_VALUE) {
+        capacityOptions[i].disabled = true;
+        capacityOptions[i].selected = false;
+
+        if (parseInt(capacityOptions[i].value, 10) === ROOMS_MAX_VALUE) {
+          capacityOptions[i].disabled = false;
+          capacityOptions[i].selected = true;
+        }
+      }
+    } else {
+      capacityOptions[i].disabled = true;
+    }
+
+  }
 });
 
 initPage();
