@@ -4,8 +4,6 @@ var ADVERTS_COUNT = 8;
 var AVATAR_FOLDER_PATH = 'img/avatars/user';
 var AVATAR_FILE_TYPE = '.png';
 var ESC_KEYCODE = 27;
-var ROOMS_MAX_VALUE = 100;
-var CAPACITY_NOGUEST_VALUE = 0;
 
 var photoSize = {
   WIDTH: 45,
@@ -98,11 +96,7 @@ var mapPinSize = {
 
 
 /**
- * @typedef {Object} OfferTypesDict
- * @param {string} flat
- * @param {string} bungalo
- * @param {string} house
- * @param {string} palace
+ * @enum {string} OfferTypesDict - названия типов предложений
  */
 var OfferTypesDict = {
   flat: 'Квартира',
@@ -112,11 +106,7 @@ var OfferTypesDict = {
 };
 
 /**
- * @typedef {Object} MinPrices
- * @param {number} bungalo
- * @param {number} flat
- * @param {number} house
- * @param {number} palace
+ * @enum {number} MinPrices - минимальные цены в зависимости от типа предложения
  */
 var MinPrices = {
   bungalo: 0,
@@ -168,6 +158,7 @@ var mapFilter = document.querySelector('.map__filters-container');
 var mapPinsElement = mapElement.querySelector('.map__pins');
 
 var form = document.querySelector('.ad-form');
+var titleField = form.querySelector('#title');
 var typeField = form.querySelector('#type');
 var priceField = form.querySelector('#price');
 var resetButton = form.querySelector('.ad-form__reset');
@@ -175,6 +166,7 @@ var checkInField = form.querySelector('#timein');
 var checkOutField = form.querySelector('#timeout');
 var roomsNumberField = form.querySelector('#room_number');
 var capacityField = form.querySelector('#capacity');
+var submitButton = form.querySelector('.ad-form__submit');
 
 var mapPins = [];
 
@@ -530,6 +522,7 @@ var setAddress = function (address) {
 var initForm = function () {
   adForm.classList.remove('ad-form--disabled');
   enableFieldsets();
+  setCapacity(roomsNumberField.value);
 };
 
 /**
@@ -539,6 +532,7 @@ var resetForm = function () {
   form.reset();
   disableFieldsets();
   adForm.classList.add('ad-form--disabled');
+  setCapacity(roomsNumberField.value);
 };
 
 var mainPinHandler = function () {
@@ -567,41 +561,60 @@ typeField.addEventListener('change', function (evt) {
   setPriceFieldParams(MinPrices[evt.target.value]);
 });
 
+/**
+ * Установка параметра value указанного поля
+ * @param {Node} field - ссылка на поле в котором нужно изменить значение атрибута value
+ * @param {string} value - значение атрибута value
+ */
+var setTimeField = function (field, value) {
+  field.value = value;
+};
 
-var timeFieldsHandler = function (evt) {
-  if (evt.target === checkInField) {
-    checkOutField.value = evt.target.value;
-  } else {
-    checkInField.value = evt.target.value;
+checkInField.addEventListener('change', function (evt) {
+  setTimeField(checkOutField, evt.target.value);
+});
+
+checkOutField.addEventListener('change', function (evt) {
+  setTimeField(checkInField, evt.target.value);
+});
+
+
+var setCapacity = function (roomsValue) {
+  /**
+   * @enum {Array.<string>} RoomsCapacity - соответствия количества гостей количеству комнат
+   */
+  var RoomsCapacity = {
+    '1': ['1'],
+    '2': ['1', '2'],
+    '3': ['1', '2', '3'],
+    '100': ['0']
+  };
+
+  var capacityOptions = capacityField.options;
+
+  for (var i = 0; i < capacityOptions.length; i++) {
+    capacityOptions[i].disabled = RoomsCapacity[roomsValue].indexOf(capacityOptions[i].value) !== -1 ? false : true;
+    capacityOptions[i].selected = capacityOptions[i].disabled ? false : true;
   }
 };
 
-checkInField.addEventListener('change', timeFieldsHandler);
+roomsNumberField.addEventListener('change', function (evt) {
+  setCapacity(evt.target.value);
+});
 
-checkOutField.addEventListener('change', timeFieldsHandler);
-
-roomsNumberField.addEventListener('change', function () {
-  var capacityOptions = capacityField.options;
-  var currentRoomsValue = parseInt(roomsNumberField.value, 10);
-
-  if (currentRoomsValue < ROOMS_MAX_VALUE) {
-    capacityField.value = roomsNumberField.value;
-    for (var i = 0; i < capacityOptions.length; i++) {
-      if (parseInt(capacityOptions[i].value, 10) <= currentRoomsValue && parseInt(capacityOptions[i].value, 10) > CAPACITY_NOGUEST_VALUE) {
-        capacityOptions[i].disabled = false;
-      } else {
-        capacityOptions[i].disabled = true;
-      }
+submitButton.addEventListener('click', function (evt) {
+  var inputs = [titleField, priceField];
+  var stopSubmit = false;
+  inputs.forEach(function (item) {
+    if (!item.validity.valid) {
+      item.parentNode.classList.add('ad-form__element--invalid');
+      stopSubmit = true;
+    } else {
+      item.parentNode.classList.remove('ad-form__element--invalid');
     }
-  } else {
-    capacityField.value = CAPACITY_NOGUEST_VALUE;
-    for (i = 0; i < capacityOptions.length; i++) {
-      if (parseInt(capacityOptions[i].value, 10) === CAPACITY_NOGUEST_VALUE) {
-        capacityOptions[i].disabled = false;
-      } else {
-        capacityOptions[i].disabled = true;
-      }
-    }
+  });
+  if (stopSubmit) {
+    evt.preventDefault();
   }
 });
 
