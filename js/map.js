@@ -542,7 +542,8 @@ var mainPinHandler = function () {
   mainPin.removeEventListener('mouseup', mainPinHandler);
 };
 
-resetButton.addEventListener('click', function () {
+resetButton.addEventListener('click', function (evt) {
+  evt.preventDefault();
   resetForm();
   resetMap();
   initPage();
