@@ -5,6 +5,7 @@ var AVATAR_FOLDER_PATH = 'img/avatars/user';
 var AVATAR_FILE_TYPE = '.png';
 var ESC_KEYCODE = 27;
 var ROOMS_MAX_VALUE = 100;
+var CAPACITY_NOGUEST_VALUE = 0;
 
 var photoSize = {
   WIDTH: 45,
@@ -580,27 +581,27 @@ checkInField.addEventListener('change', timeFieldsHandler);
 checkOutField.addEventListener('change', timeFieldsHandler);
 
 roomsNumberField.addEventListener('change', function () {
-  capacityField.value = roomsNumberField.value;
   var capacityOptions = capacityField.options;
   var currentRoomsValue = parseInt(roomsNumberField.value, 10);
 
-  for (var i = 0; i < capacityOptions.length; i++) {
-    if (parseInt(capacityOptions[i].value, 10) <= currentRoomsValue) {
-      capacityOptions[i].disabled = false;
-
-      if (currentRoomsValue === ROOMS_MAX_VALUE) {
+  if (currentRoomsValue < ROOMS_MAX_VALUE) {
+    capacityField.value = roomsNumberField.value;
+    for (var i = 0; i < capacityOptions.length; i++) {
+      if (parseInt(capacityOptions[i].value, 10) <= currentRoomsValue && parseInt(capacityOptions[i].value, 10) > CAPACITY_NOGUEST_VALUE) {
+        capacityOptions[i].disabled = false;
+      } else {
         capacityOptions[i].disabled = true;
-        capacityOptions[i].selected = false;
-
-        if (parseInt(capacityOptions[i].value, 10) === ROOMS_MAX_VALUE) {
-          capacityOptions[i].disabled = false;
-          capacityOptions[i].selected = true;
-        }
       }
-    } else {
-      capacityOptions[i].disabled = true;
     }
-
+  } else {
+    capacityField.value = CAPACITY_NOGUEST_VALUE;
+    for (i = 0; i < capacityOptions.length; i++) {
+      if (parseInt(capacityOptions[i].value, 10) === CAPACITY_NOGUEST_VALUE) {
+        capacityOptions[i].disabled = false;
+      } else {
+        capacityOptions[i].disabled = true;
+      }
+    }
   }
 });
 
