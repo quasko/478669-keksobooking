@@ -100,6 +100,13 @@ var OfferTypesDict = {
   palace: 'Дворец'
 };
 
+var MinPrice = {
+  bungalo: 0,
+  flat: 1000,
+  house: 5000,
+  palace: 1000000
+};
+
 var ESC_KEYCODE = 27;
 
 /**
@@ -144,6 +151,17 @@ var fieldsets = document.querySelectorAll('.ad-form > fieldset');
 var mapFilter = document.querySelector('.map__filters-container');
 var mapPinsElement = mapElement.querySelector('.map__pins');
 
+var form = document.querySelector('.ad-form');
+var typeField = form.querySelector('#type');
+var priceField = form.querySelector('#price');
+var resetButton = form.querySelector('.ad-form__reset');
+var checkInField = form.querySelector('#timein');
+var checkOutField = form.querySelector('#timeout');
+var roomsNumberField = form.querySelector('#room_number');
+var capacityField = form.querySelector('#capacity');
+
+var mapPins = [];
+
 var mapOffersStatus = {
   pin: null,
   card: null,
@@ -172,6 +190,12 @@ var mapOffersStatus = {
 var enableFieldsets = function () {
   fieldsets.forEach(function (item) {
     item.disabled = false;
+  });
+};
+
+var disableFieldsets = function () {
+  fieldsets.forEach(function (item) {
+    item.disabled = true;
   });
 };
 
@@ -254,6 +278,7 @@ var createPinElement = function (mapPin) {
     }
   });
 
+  mapPins.push(mapPinElement);
   return mapPinElement;
 };
 
@@ -424,6 +449,11 @@ var popupEscPressHandler = function (evt) {
   }
 };
 
+var initPage = function () {
+  mainPin.addEventListener('mouseup', mainPinHandler);
+  setAddress(getMainPinAddress());
+};
+
 /**
  * перевод карты в активное состояние
  */
@@ -432,6 +462,20 @@ var initMap = function () {
   mapElement.classList.remove('map--faded');
   var mapPinFragment = createMapPinFragment(adverts);
   mapPinsElement.appendChild(mapPinFragment);
+};
+
+/**
+ * перевод карты в неактивное стояние
+ */
+var resetMap = function () {
+  mapPins.forEach(function (item) {
+    item.remove();
+  });
+  if (mapOffersStatus.checkCard()) {
+    mapOffersStatus.deactivateCard();
+  }
+  mapOffersStatus.deactivatePin();
+  mapElement.classList.add('map--faded');
 };
 
 /**
@@ -472,6 +516,15 @@ var initForm = function () {
   enableFieldsets();
 };
 
+/**
+ * перевод формы в неактивное состояние
+ */
+var resetForm = function () {
+  form.reset();
+  disableFieldsets();
+  adForm.classList.add('ad-form--disabled');
+};
+
 var mainPinHandler = function () {
   initMap();
   initForm();
@@ -479,5 +532,57 @@ var mainPinHandler = function () {
   mainPin.removeEventListener('mouseup', mainPinHandler);
 };
 
-mainPin.addEventListener('mouseup', mainPinHandler);
-setAddress(getMainPinAddress());
+resetButton.addEventListener('click', function () {
+  resetForm();
+  resetMap();
+  initPage();
+});
+
+
+/**
+ * Установка параметров поля "Цена за ночь"
+ * @param {number} minPrice
+ */
+var setPriceFieldParams = function (minPrice) {
+  priceField.placeholder = minPrice;
+  priceField.min = minPrice;
+};
+
+typeField.addEventListener('change', function (evt) {
+  setPriceFieldParams(MinPrice[evt.target.value]);
+});
+
+checkInField.addEventListener('change', function (evt) {
+  checkOutField.value = evt.target.value;
+});
+
+checkOutField.addEventListener('change', function (evt) {
+  checkInField.value = evt.target.value;
+});
+
+roomsNumberField.addEventListener('change', function (evt) {
+  var capacityOptions = capacityField.options;
+  capacityOptions[3].disabled = true;
+  var roomsValue = evt.target.value;
+  if (roomsValue === '100') {
+
+    for (var i = 0; i < capacityOptions.length; i++) {
+      capacityOptions[i].disabled = true;
+      capacityOptions[i].selected = false;
+    }
+    capacityOptions[3].disabled = false;
+    capacityOptions[3].selected = true;
+    return;
+  }
+
+  for (i = 0; i < capacityOptions.length - 1; i++) {
+    if (roomsValue < capacityOptions[i].value) {
+      capacityOptions[i].disabled = true;
+    } else {
+      capacityOptions[i].disabled = false;
+    }
+  }
+
+});
+
+initPage();
