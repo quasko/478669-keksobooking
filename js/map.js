@@ -112,7 +112,7 @@ var MinPrices = {
   bungalo: 0,
   flat: 1000,
   house: 5000,
-  palace: 1000000
+  palace: 10000
 };
 
 /**
