@@ -636,7 +636,9 @@ fieldset {
           box-shadow: 0 0 2px 2px #ff6547;
 }
 
-.ad-form__element.ad-form__element--invalid input {
+.ad-form__element.ad-form__element--invalid input,
+.ad-form__element.ad-form__element--invalid select,
+.ad-form__element.ad-form__element--invalid textarea {
   box-shadow: 0 0 10px 3px red;
 }
 
