@@ -3,6 +3,7 @@
 var ADVERTS_COUNT = 8;
 var AVATAR_FOLDER_PATH = 'img/avatars/user';
 var AVATAR_FILE_TYPE = '.png';
+var ESC_KEYCODE = 27;
 
 var photoSize = {
   WIDTH: 45,
@@ -93,6 +94,10 @@ var mapPinSize = {
   HEIGHT: 70
 };
 
+
+/**
+ * @enum {string} OfferTypesDict - названия типов предложений
+ */
 var OfferTypesDict = {
   flat: 'Квартира',
   bungalo: 'Бунгало',
@@ -100,7 +105,25 @@ var OfferTypesDict = {
   palace: 'Дворец'
 };
 
-var ESC_KEYCODE = 27;
+/**
+ * @enum {number} MinPrices - минимальные цены в зависимости от типа предложения
+ */
+var MinPrices = {
+  bungalo: 0,
+  flat: 1000,
+  house: 5000,
+  palace: 10000
+};
+
+/**
+  * @enum {Array.<string>} RoomsCapacity - соответствия количества гостей количеству комнат
+  */
+var RoomsCapacity = {
+  '1': ['1'],
+  '2': ['1', '2'],
+  '3': ['1', '2', '3'],
+  '100': ['0']
+};
 
 /**
  * @typedef {Object} Advert - объект с параметрами карточки объявления.
@@ -144,6 +167,17 @@ var fieldsets = document.querySelectorAll('.ad-form > fieldset');
 var mapFilter = document.querySelector('.map__filters-container');
 var mapPinsElement = mapElement.querySelector('.map__pins');
 
+var form = document.querySelector('.ad-form');
+var typeField = form.querySelector('#type');
+var priceField = form.querySelector('#price');
+var resetButton = form.querySelector('.ad-form__reset');
+var checkInField = form.querySelector('#timein');
+var checkOutField = form.querySelector('#timeout');
+var roomsNumberField = form.querySelector('#room_number');
+var capacityField = form.querySelector('#capacity');
+
+var mapPins = [];
+
 var mapOffersStatus = {
   pin: null,
   card: null,
@@ -172,6 +206,13 @@ var mapOffersStatus = {
 var enableFieldsets = function () {
   fieldsets.forEach(function (item) {
     item.disabled = false;
+  });
+};
+
+var disableFieldsets = function () {
+  fieldsets.forEach(function (item) {
+    item.disabled = true;
+    item.classList.remove('ad-form__element--invalid');
   });
 };
 
@@ -254,6 +295,7 @@ var createPinElement = function (mapPin) {
     }
   });
 
+  mapPins.push(mapPinElement);
   return mapPinElement;
 };
 
@@ -424,6 +466,11 @@ var popupEscPressHandler = function (evt) {
   }
 };
 
+var initPage = function () {
+  mainPin.addEventListener('mouseup', mainPinHandler);
+  setAddress(getMainPinAddress());
+};
+
 /**
  * перевод карты в активное состояние
  */
@@ -432,6 +479,20 @@ var initMap = function () {
   mapElement.classList.remove('map--faded');
   var mapPinFragment = createMapPinFragment(adverts);
   mapPinsElement.appendChild(mapPinFragment);
+};
+
+/**
+ * перевод карты в неактивное стояние
+ */
+var resetMap = function () {
+  mapPins.forEach(function (item) {
+    item.remove();
+  });
+  if (mapOffersStatus.checkCard()) {
+    mapOffersStatus.deactivateCard();
+  }
+  mapOffersStatus.deactivatePin();
+  mapElement.classList.add('map--faded');
 };
 
 /**
@@ -445,7 +506,7 @@ var initMap = function () {
  * @return {Coordinates}
  */
 var getMainPinAddress = function () {
-  var state = mapElement.classList.contains('map--faded') ? 'active' : 'inactive';
+  var state = mapElement.classList.contains('map--faded') ? 'inactive' : 'active';
   var addressX = Math.round(mainPin.offsetLeft + mainPinSize[state].WIDTH / 2);
   var addressY = state === 'active' ? Math.round(mainPin.offsetTop + mainPinSize.active.HEIGHT)
     : Math.round(mainPin.offsetTop + mainPinSize.inactive.HEIGHT / 2);
@@ -470,6 +531,17 @@ var setAddress = function (address) {
 var initForm = function () {
   adForm.classList.remove('ad-form--disabled');
   enableFieldsets();
+  setCapacity(roomsNumberField.value);
+};
+
+/**
+ * перевод формы в неактивное состояние
+ */
+var resetForm = function () {
+  form.reset();
+  disableFieldsets();
+  adForm.classList.add('ad-form--disabled');
+  setCapacity(roomsNumberField.value);
 };
 
 var mainPinHandler = function () {
@@ -479,5 +551,75 @@ var mainPinHandler = function () {
   mainPin.removeEventListener('mouseup', mainPinHandler);
 };
 
-mainPin.addEventListener('mouseup', mainPinHandler);
-setAddress(getMainPinAddress());
+resetButton.addEventListener('click', function (evt) {
+  evt.preventDefault();
+  resetForm();
+  resetMap();
+  initPage();
+});
+
+/**
+ * Установка параметров поля "Цена за ночь"
+ * @param {number} minPrice
+ */
+var setPriceFieldParams = function (minPrice) {
+  priceField.placeholder = minPrice;
+  priceField.min = minPrice;
+};
+
+typeField.addEventListener('change', function (evt) {
+  setPriceFieldParams(MinPrices[evt.target.value]);
+});
+
+/**
+ * Установка параметра value указанного поля
+ * @param {Node} field - ссылка на поле в котором нужно изменить значение атрибута value
+ * @param {string} value - значение атрибута value
+ */
+var setTimeField = function (field, value) {
+  field.value = value;
+};
+
+checkInField.addEventListener('change', function (evt) {
+  setTimeField(checkOutField, evt.target.value);
+});
+
+checkOutField.addEventListener('change', function (evt) {
+  setTimeField(checkInField, evt.target.value);
+});
+
+/**
+ * установка возможных вариантов выбора количества мест в соответствии с количеством комнат
+ * @param {string} roomsValue - текущее значение количества комнат
+ */
+var setCapacity = function (roomsValue) {
+  var capacityOptions = capacityField.options;
+
+  for (var i = 0; i < capacityOptions.length; i++) {
+    capacityOptions[i].disabled = !RoomsCapacity[roomsValue].includes(capacityOptions[i].value);
+  }
+
+  if (capacityField.options[capacityField.selectedIndex].disabled) {
+    capacityField.value = RoomsCapacity[roomsValue][0];
+  }
+};
+
+roomsNumberField.addEventListener('change', function (evt) {
+  setCapacity(evt.target.value);
+});
+
+form.addEventListener('invalid', function (evt) {
+  evt.target.parentNode.classList.add('ad-form__element--invalid');
+  evt.target.addEventListener('keydown', invalidHandler);
+  evt.target.addEventListener('change', invalidHandler);
+}, true);
+
+var invalidHandler = function (evt) {
+  if (evt.target.checkValidity()) {
+    evt.target.parentNode.classList.remove('ad-form__element--invalid');
+    evt.target.removeEventListener('keydown', invalidHandler);
+    evt.target.removeEventListener('change', invalidHandler);
+  }
+};
+
+initPage();
