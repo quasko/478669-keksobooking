@@ -610,6 +610,16 @@ roomsNumberField.addEventListener('change', function (evt) {
 
 form.addEventListener('invalid', function (evt) {
   evt.target.parentNode.classList.add('ad-form__element--invalid');
+  evt.target.addEventListener('keydown', invalidHandler);
+  evt.target.addEventListener('change', invalidHandler);
 }, true);
+
+var invalidHandler = function (evt) {
+  if (evt.target.checkValidity()) {
+    evt.target.parentNode.classList.remove('ad-form__element--invalid');
+    evt.target.removeEventListener('keydown', invalidHandler);
+    evt.target.removeEventListener('change', invalidHandler);
+  }
+};
 
 initPage();
