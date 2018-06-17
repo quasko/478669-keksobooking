@@ -486,6 +486,7 @@ var initPage = function () {
  */
 var initMap = function () {
   mapElement.classList.remove('map--faded');
+
 };
 
 /**
@@ -565,15 +566,17 @@ var moveMainPin = function (x, y) {
 
 var mainPinMouseDownHandler = function (evt) {
   evt.preventDefault();
-  initMap();
-  initForm();
-
   var startCoords = {
     x: evt.clientX,
     y: evt.clientY
   };
 
   var mouseMoveHandler = function (moveEvt) {
+    if (mapElement.classList.contains('map--faded')) {
+      initMap();
+      initForm();
+    }
+
     var shift = {
       x: startCoords.x - moveEvt.clientX,
       y: startCoords.y - moveEvt.clientY
@@ -600,6 +603,8 @@ var mainPinMouseDownHandler = function (evt) {
   var mouseUpHandler = function (upEvt) {
     upEvt.preventDefault();
     if (firstMove) {
+      initMap();
+      initForm();
       var adverts = generateAdverts(ADVERTS_COUNT);
       var mapPinFragment = createMapPinFragment(adverts);
       mapPinsElement.appendChild(mapPinFragment);
