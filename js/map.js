@@ -94,6 +94,15 @@ var mapPinSize = {
   HEIGHT: 70
 };
 
+var mainPinDefaultPosition = {
+  LEFT: 570,
+  TOP: 375
+};
+
+var mainPinMoveVerticalLimits = {
+  MIN: 130,
+  MAX: 630
+};
 
 /**
  * @enum {string} OfferTypesDict - названия типов предложений
@@ -177,6 +186,7 @@ var roomsNumberField = form.querySelector('#room_number');
 var capacityField = form.querySelector('#capacity');
 
 var mapPins = [];
+var firstMove = true;
 
 var mapOffersStatus = {
   pin: null,
@@ -467,7 +477,7 @@ var popupEscPressHandler = function (evt) {
 };
 
 var initPage = function () {
-  mainPin.addEventListener('mouseup', mainPinHandler);
+  mainPin.addEventListener('mousedown', mainPinMouseDownHandler);
   setAddress(getMainPinAddress());
 };
 
@@ -475,10 +485,7 @@ var initPage = function () {
  * перевод карты в активное состояние
  */
 var initMap = function () {
-  var adverts = generateAdverts(ADVERTS_COUNT);
   mapElement.classList.remove('map--faded');
-  var mapPinFragment = createMapPinFragment(adverts);
-  mapPinsElement.appendChild(mapPinFragment);
 };
 
 /**
@@ -493,6 +500,7 @@ var resetMap = function () {
   }
   mapOffersStatus.deactivatePin();
   mapElement.classList.add('map--faded');
+
 };
 
 /**
@@ -544,11 +552,66 @@ var resetForm = function () {
   setCapacity(roomsNumberField.value);
 };
 
-var mainPinHandler = function () {
+/**
+ * перемещение mainPin по заданным координатам
+ * @param {number} x - координата X
+ * @param {number} y - координата Y
+ */
+var moveMainPin = function (x, y) {
+  mainPin.style.top = y + 'px';
+  mainPin.style.left = x + 'px';
+  setAddress(getMainPinAddress());
+};
+
+var mainPinMouseDownHandler = function (evt) {
+  evt.preventDefault();
   initMap();
   initForm();
-  setAddress(getMainPinAddress());
-  mainPin.removeEventListener('mouseup', mainPinHandler);
+
+  var startCoords = {
+    x: evt.clientX,
+    y: evt.clientY
+  };
+
+  var mouseMoveHandler = function (moveEvt) {
+    var shift = {
+      x: startCoords.x - moveEvt.clientX,
+      y: startCoords.y - moveEvt.clientY
+    };
+
+    if (mainPin.offsetTop - shift.y >= mainPinMoveVerticalLimits.MAX ||
+      mainPin.offsetTop - shift.y <= mainPinMoveVerticalLimits.MIN) {
+      shift.y = 0;
+    }
+
+    if (mainPin.offsetLeft - shift.x <= 0 ||
+      mainPin.offsetLeft - shift.x >= mapElement.clientWidth - mainPin.clientWidth) {
+      shift.x = 0;
+    }
+
+    startCoords = {
+      x: moveEvt.clientX,
+      y: moveEvt.clientY
+    };
+
+    moveMainPin(mainPin.offsetLeft - shift.x, mainPin.offsetTop - shift.y);
+  };
+
+  var mouseUpHandler = function (upEvt) {
+    upEvt.preventDefault();
+    if (firstMove) {
+      var adverts = generateAdverts(ADVERTS_COUNT);
+      var mapPinFragment = createMapPinFragment(adverts);
+      mapPinsElement.appendChild(mapPinFragment);
+      firstMove = false;
+    }
+    document.removeEventListener('mousemove', mouseMoveHandler);
+    document.removeEventListener('mouseup', mouseUpHandler);
+    setAddress(getMainPinAddress());
+  };
+
+  document.addEventListener('mousemove', mouseMoveHandler);
+  document.addEventListener('mouseup', mouseUpHandler);
 };
 
 resetButton.addEventListener('click', function (evt) {
@@ -556,6 +619,8 @@ resetButton.addEventListener('click', function (evt) {
   resetForm();
   resetMap();
   initPage();
+  moveMainPin(mainPinDefaultPosition.LEFT, mainPinDefaultPosition.TOP);
+  firstMove = true;
 });
 
 /**
