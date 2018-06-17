@@ -579,13 +579,13 @@ var mainPinMouseDownHandler = function (evt) {
       y: startCoords.y - moveEvt.clientY
     };
 
-    if (mainPin.offsetTop - shift.y >= mainPinMoveVerticalLimits.MAX ||
-      mainPin.offsetTop - shift.y <= mainPinMoveVerticalLimits.MIN) {
+    if (mainPin.offsetTop - shift.y > mainPinMoveVerticalLimits.MAX - mainPinSize.active.HEIGHT ||
+      mainPin.offsetTop - shift.y < mainPinMoveVerticalLimits.MIN - mainPinSize.active.HEIGHT) {
       shift.y = 0;
     }
 
-    if (mainPin.offsetLeft - shift.x <= 0 ||
-      mainPin.offsetLeft - shift.x >= mapElement.clientWidth - mainPin.clientWidth) {
+    if (mainPin.offsetLeft - shift.x + mainPinSize.active.WIDTH / 2 < 0 ||
+      mainPin.offsetLeft - shift.x - mainPinSize.active.WIDTH / 2 > mapElement.clientWidth - mainPin.clientWidth) {
       shift.x = 0;
     }
 
