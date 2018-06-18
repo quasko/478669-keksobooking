@@ -1,7 +1,9 @@
 'use strict';
 
-
 (function () {
+  var AVATAR_FOLDER_PATH = 'img/avatars/user';
+  var AVATAR_FILE_TYPE = '.png';
+
   var offerParams = {
     TITLES: [
       'Большая уютная квартира',
@@ -67,26 +69,6 @@
       MIN: 130,
       MAX: 630
     }
-  };
-
-  /**
-   * @enum {string} OfferTypesDict - названия типов предложений
-   */
-  var OfferTypesDict = {
-    flat: 'Квартира',
-    bungalo: 'Бунгало',
-    house: 'Дом',
-    palace: 'Дворец'
-  };
-
-  /**
-   * @enum {number} MinPrices - минимальные цены в зависимости от типа предложения
-   */
-  var MinPrices = {
-    bungalo: 0,
-    flat: 1000,
-    house: 5000,
-    palace: 10000
   };
 
   /**
@@ -191,5 +173,8 @@
     return adverts;
   };
 
-  window.generateAdverts = generateAdverts;
+  window.data = {
+    generateAdverts: generateAdverts
+  };
+
 })();

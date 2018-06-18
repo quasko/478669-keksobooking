@@ -6,31 +6,19 @@
     WIDTH: 45,
     HEIGTH: 40
   };
+
+  /**
+   * @enum {string} OfferTypesDict - названия типов предложений
+   */
+  var OfferTypesDict = {
+    flat: 'Квартира',
+    bungalo: 'Бунгало',
+    house: 'Дом',
+    palace: 'Дворец'
+  };
   var mapElement = document.querySelector('.map');
   var template = document.querySelector('template').content;
   var mapFilter = document.querySelector('.map__filters-container');
-
-  var mapOffersStatus = {
-    pin: null,
-    card: null,
-    checkCard: function () {
-      return this.card ? true : false;
-    },
-    deactivateCard: function () {
-      this.card.remove();
-      this.card = null;
-    },
-    deactivatePin: function () {
-      if (this.pin) {
-        this.pin.classList.remove('map__pin--active');
-        this.pin = null;
-      }
-    },
-    activatePin: function (pin) {
-      this.pin = pin;
-      this.pin.classList.add('map__pin--active');
-    }
-  };
 
   var mapCardStatus = {
     card: null,
@@ -38,8 +26,10 @@
       return this.card ? true : false;
     },
     deactivateCard: function () {
-      this.card.remove();
-      this.card = null;
+      if (this.checkCard()) {
+        this.card.remove();
+        this.card = null;
+      }
     },
   };
 
@@ -77,7 +67,7 @@
     var photoElement = document.createElement('img');
     photoElement.classList.add('popup__photo');
     photoElement.width = photoSize.WIDTH;
-    photoElement.height = photoSize.HEIGHT;
+    photoElement.height = photoSize.HEIGTH;
     photoElement.alt = 'Фотография жилья';
     photoElement.src = src;
     return photoElement;
@@ -125,6 +115,8 @@
       mapCardElement.querySelector('.popup__features').appendChild((createFeatureElement(item)));
     });
 
+    mapCardElement.querySelector('.popup__description').textContent = advert.offer.description;
+
     advert.offer.photos.forEach(function (item) {
       mapCardElement.querySelector('.popup__photos').appendChild(createPhotoElement(item));
     });
@@ -139,8 +131,8 @@
   };
 
   var closePopup = function () {
-    mapOffersStatus.deactivateCard();
-    mapOffersStatus.deactivatePin();
+    mapCardStatus.deactivateCard();
+    window.pins.deactivatePin();
     document.removeEventListener('keydown', popupEscPressHandler);
   };
 
@@ -150,9 +142,14 @@
     }
   };
 
-  window.renderMapCard = function (mapPin) {
-    var newCard = createMapCardElement(mapPin);
-    renderCard(newCard);
+  window.card = {
+    renderMapCard: function (mapPin) {
+      var newCard = createMapCardElement(mapPin);
+      renderCard(newCard);
+    },
+    deactivateCard: function () {
+      mapCardStatus.deactivateCard();
+    }
   };
 
 })();

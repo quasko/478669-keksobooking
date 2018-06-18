@@ -26,17 +26,16 @@
   var pageActivated = false;
   var mainPin = document.querySelector('.map__pin--main');
   var mapElement = document.querySelector('.map');
-  var adForm = document.querySelector('.ad-form');
+  var form = document.querySelector('.ad-form');
 
   /**
    * перевод формы в активное состояние
    */
   var activatePage = function () {
     mapElement.classList.remove('map--faded');
-    adForm.classList.remove('ad-form--disabled');
-    //enableFieldsets();
-    //setCapacity(roomsNumberField.value);
-    window.renderMapPins();
+    form.classList.remove('ad-form--disabled');
+    window.form.enableForm();
+    window.pins.renderMapPins();
     pageActivated = true;
   };
 
@@ -48,7 +47,25 @@
   var moveMainPin = function (x, y) {
     mainPin.style.top = y + 'px';
     mainPin.style.left = x + 'px';
-    //setAddress(getMainPinAddress());
+    window.form.setAddress(getMainPinAddress());
+  };
+
+  /**
+   * вычисление адреса метки mainPin на карте
+   * @return {Coordinates}
+   */
+  var getMainPinAddress = function () {
+    var addressX = Math.round(mainPin.offsetLeft + (pageActivated ?
+      mainPinParams.size.active.WIDTH / 2 :
+      mainPinParams.size.inactive.WIDTH / 2));
+    var addressY = pageActivated ?
+      Math.round(mainPin.offsetTop + mainPinParams.size.active.HEIGHT) :
+      Math.round(mainPin.offsetTop + mainPinParams.size.inactive.HEIGHT / 2);
+    var coord = {
+      x: addressX,
+      y: addressY
+    };
+    return coord;
   };
 
   var mainPinMouseDownHandler = function (evt) {
@@ -107,7 +124,7 @@
       }
       document.removeEventListener('mousemove', mouseMoveHandler);
       document.removeEventListener('mouseup', mouseUpHandler);
-      //setAddress(getMainPinAddress());
+      window.form.setAddress(getMainPinAddress());
     };
 
     document.addEventListener('mousemove', mouseMoveHandler);
@@ -116,10 +133,24 @@
 
   var initPage = function () {
     mainPin.addEventListener('mousedown', mainPinMouseDownHandler);
-    //setAddress(getMainPinAddress());
+    window.form.setAddress(getMainPinAddress());
   };
 
   initPage();
 
-  window.initPage = initPage;
+  window.page = {
+    initPage: initPage,
+    activatePage: function () {
+      pageActivated = true;
+    },
+    deactivatePage: function () {
+      pageActivated = false;
+      mapElement.classList.add('map--faded');
+      moveMainPin(mainPinParams.defaultPosition.LEFT, mainPinParams.defaultPosition.TOP);
+      window.card.deactivateCard();
+      window.pins.deactivatePin();
+      window.form.setAddress(getMainPinAddress());
+    },
+    getMainPinAddress: getMainPinAddress
+  };
 })();

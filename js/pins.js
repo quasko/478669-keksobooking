@@ -26,10 +26,10 @@
   };
 
   /**
-    * создание DOM элемента для метки на карте
-    * @param {Advert} mapPin - объект с параметрами метки на карте
-    * @return {Node}
-    */
+   * создание DOM элемента для метки на карте
+   * @param {Advert} mapPin - объект с параметрами метки на карте
+   * @return {Node}
+   */
   var createPinElement = function (mapPin) {
     var mapPinElement = template.querySelector('.map__pin').cloneNode(true);
 
@@ -45,7 +45,7 @@
 
         /* var newCard = createMapCardElement(mapPin);
         renderCard(newCard); */
-        window.renderMapCard(mapPin);
+        window.card.renderMapCard(mapPin);
       }
     });
 
@@ -54,10 +54,10 @@
   };
 
   /**
- * создание фрагмента содержащего метки на карте.
- * @param {Array.<Advert>} array - массив с параметрами меток на карте.
- * @return {Node}
- */
+   * создание фрагмента содержащего метки на карте.
+   * @param {Array.<Advert>} array - массив с параметрами меток на карте.
+   * @return {Node}
+   */
   var createMapPinFragment = function (array) {
     var fragment = document.createDocumentFragment();
     array.forEach(function (item) {
@@ -67,14 +67,19 @@
     return fragment;
   };
 
-  /* var adverts = window.generateAdverts(ADVERTS_COUNT);
-  var mapPinFragment = createMapPinFragment(adverts);
-  mapPinsElement.appendChild(mapPinFragment); */
-
-  window.renderMapPins = function () {
-    var adverts = window.generateAdverts(ADVERTS_COUNT);
-    var mapPinFragment = createMapPinFragment(adverts);
-    mapPinsElement.appendChild(mapPinFragment);
+  window.pins = {
+    renderMapPins: function () {
+      var adverts = window.data.generateAdverts(ADVERTS_COUNT);
+      var mapPinFragment = createMapPinFragment(adverts);
+      mapPinsElement.appendChild(mapPinFragment);
+    },
+    deactivatePin: function () {
+      mapPinStatus.deactivatePin();
+    },
+    removePins: function () {
+      mapPins.forEach(function (item) {
+        item.remove();
+      });
+    }
   };
-
 })();
