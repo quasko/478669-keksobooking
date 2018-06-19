@@ -16,19 +16,20 @@
     house: 'Дом',
     palace: 'Дворец'
   };
+
   var mapElement = document.querySelector('.map');
   var template = document.querySelector('template').content;
   var mapFilter = document.querySelector('.map__filters-container');
 
-  var mapCardStatus = {
-    card: null,
-    checkCard: function () {
-      return Boolean(this.card);
+  var cardStatus = {
+    activeNode: null,
+    check: function () {
+      return Boolean(this.activeNode);
     },
-    deactivateCard: function () {
-      if (this.checkCard()) {
-        this.card.remove();
-        this.card = null;
+    deactivate: function () {
+      if (this.check()) {
+        this.activeNode.remove();
+        this.activeNode = null;
       }
     },
   };
@@ -38,10 +39,7 @@
    * @param {Node} card - карточка объявления
    */
   var renderCard = function (card) {
-    if (mapCardStatus.checkCard()) {
-      mapCardStatus.deactivateCard();
-    }
-    mapCardStatus.card = card;
+    cardStatus.activeNode = card;
     mapElement.insertBefore(card, mapFilter);
   };
 
@@ -50,7 +48,7 @@
    * @param {string} feature - название удобства
    * @return {Node}
    */
-  var createFeatureElement = function (feature) {
+  var createFeature = function (feature) {
     var listItemElement = document.createElement('li');
     listItemElement.classList.add('popup__feature');
     listItemElement.classList.add('popup__feature--' + feature);
@@ -63,7 +61,7 @@
    * @param {string} src - путь к файлу
    * @return {Node}
    */
-  var createPhotoElement = function (src) {
+  var createPhoto = function (src) {
     var photoElement = document.createElement('img');
     photoElement.classList.add('popup__photo');
     photoElement.width = photoSize.WIDTH;
@@ -78,8 +76,9 @@
    * @param {Advert} advert - объект с параметрами карточки объявления
    * @return {Node}
    */
-  var createMapCardElement = function (advert) {
+  var createCard = function (advert) {
     var mapCardElement = template.querySelector('.map__card').cloneNode(true);
+    var closeButton = mapCardElement.querySelector('.popup__close');
 
     mapCardElement.querySelector('.popup__title').textContent = advert.offer.title;
     mapCardElement.querySelector('.popup__text--address').textContent = advert.offer.address;
@@ -93,43 +92,41 @@
       ', выезд до ' + advert.offer.checkout;
 
     advert.offer.features.forEach(function (item) {
-      mapCardElement.querySelector('.popup__features').appendChild((createFeatureElement(item)));
+      mapCardElement.querySelector('.popup__features').appendChild((createFeature(item)));
     });
 
     mapCardElement.querySelector('.popup__description').textContent = advert.offer.description;
 
     advert.offer.photos.forEach(function (item) {
-      mapCardElement.querySelector('.popup__photos').appendChild(createPhotoElement(item));
+      mapCardElement.querySelector('.popup__photos').appendChild(createPhoto(item));
     });
 
     mapCardElement.querySelector('.popup__avatar').src = advert.author.avatar;
-
-    var closeButton = mapCardElement.querySelector('.popup__close');
-    closeButton.addEventListener('click', closePopup);
-    document.addEventListener('keydown', popupEscPressHandler);
+    closeButton.addEventListener('click', closeCard);
+    document.addEventListener('keydown', cardEscPressHandler);
 
     return mapCardElement;
   };
 
-  var closePopup = function () {
-    mapCardStatus.deactivateCard();
+  var closeCard = function () {
+    cardStatus.deactivate();
     window.pin.deactivate();
-    document.removeEventListener('keydown', popupEscPressHandler);
+    document.removeEventListener('keydown', cardEscPressHandler);
   };
 
-  var popupEscPressHandler = function (evt) {
+  var cardEscPressHandler = function (evt) {
     if (evt.keyCode === ESC_KEYCODE) {
-      closePopup();
+      closeCard();
     }
   };
 
   window.card = {
-    render: function (mapPin) {
-      var newCard = createMapCardElement(mapPin);
+    render: function (pin) {
+      var newCard = createCard(pin);
       renderCard(newCard);
     },
     deactivate: function () {
-      mapCardStatus.deactivateCard();
+      cardStatus.deactivate();
     }
   };
 

@@ -10,38 +10,39 @@
 
   var mapPins = [];
 
-  var mapPinStatus = {
-    pin: null,
-    deactivatePin: function () {
-      if (this.pin) {
-        this.pin.classList.remove('map__pin--active');
-        this.pin = null;
+  var pinStatus = {
+    activeNode: null,
+    deactivate: function () {
+      if (this.activeNode) {
+        this.activeNode.classList.remove('map__pin--active');
+        this.activeNode = null;
       }
     },
-    activatePin: function (pin) {
-      this.pin = pin;
-      this.pin.classList.add('map__pin--active');
+    activate: function (pin) {
+      this.activeNode = pin;
+      this.activeNode.classList.add('map__pin--active');
     }
   };
 
   /**
    * создание DOM элемента для метки на карте
-   * @param {Advert} mapPin - объект с параметрами метки на карте
+   * @param {Advert} pin - объект с параметрами метки на карте
    * @return {Node}
    */
-  var createPinElement = function (mapPin) {
+  var createPinElement = function (pin) {
     var mapPinElement = template.querySelector('.map__pin').cloneNode(true);
 
-    mapPinElement.style.left = (mapPin.location.x - mapPinSize.WIDTH / 2) + 'px';
-    mapPinElement.style.top = (mapPin.location.y - mapPinSize.HEIGHT).toString() + 'px';
-    mapPinElement.querySelector('img').src = mapPin.author.avatar;
-    mapPinElement.querySelector('img').alt = mapPin.offer.title;
+    mapPinElement.style.left = (pin.location.x - mapPinSize.WIDTH / 2) + 'px';
+    mapPinElement.style.top = (pin.location.y - mapPinSize.HEIGHT).toString() + 'px';
+    mapPinElement.querySelector('img').src = pin.author.avatar;
+    mapPinElement.querySelector('img').alt = pin.offer.title;
 
     mapPinElement.addEventListener('click', function (evt) {
-      if (!evt.currentTarget.classList.contains('map__pin--active')) {
-        mapPinStatus.deactivatePin();
-        mapPinStatus.activatePin(evt.currentTarget);
-        window.card.render(mapPin);
+      if (evt.currentTarget !== pinStatus.activeNode) {
+        pinStatus.deactivate();
+        pinStatus.activate(evt.currentTarget);
+        window.card.deactivate();
+        window.card.render(pin);
       }
     });
 
@@ -68,7 +69,7 @@
    * @param {Array.<Advert>} array - массив с параметрами меток на карте.
    * @return {Node}
    */
-  var createMapPinFragment = function (array) {
+  var createPinsFragment = function (array) {
     var fragment = document.createDocumentFragment();
     array.forEach(function (item) {
       fragment.appendChild(createPinElement(item));
@@ -80,11 +81,11 @@
   window.pin = {
     render: function () {
       var adverts = generateAdverts(ADVERTS_COUNT);
-      var mapPinFragment = createMapPinFragment(adverts);
-      return mapPinFragment;
+      var pinsFragment = createPinsFragment(adverts);
+      return pinsFragment;
     },
     deactivate: function () {
-      mapPinStatus.deactivatePin();
+      pinStatus.deactivate();
     },
     remove: function () {
       mapPins.forEach(function (item) {

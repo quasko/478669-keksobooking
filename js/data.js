@@ -1,8 +1,8 @@
 'use strict';
 
 (function () {
-  var AVATAR_FOLDER_PATH = 'img/avatars/user';
-  var AVATAR_FILE_TYPE = '.png';
+  var AVATAR_DIR = 'img/avatars/user';
+  var AVATAR_EXT = '.png';
 
   var offerParams = {
     TITLES: [
@@ -78,7 +78,7 @@
    */
   var getAvatarPath = function (index) {
     var avatarIndex = index < 10 ? '0' + index : '' + index;
-    return AVATAR_FOLDER_PATH + avatarIndex + AVATAR_FILE_TYPE;
+    return AVATAR_DIR + avatarIndex + AVATAR_EXT;
   };
 
   /**

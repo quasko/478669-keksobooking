@@ -62,14 +62,10 @@
    * Установка параметров поля "Цена за ночь"
    * @param {number} minPrice
    */
-  var setPriceFieldParams = function (minPrice) {
+  var setPriceParams = function (minPrice) {
     priceField.placeholder = minPrice;
     priceField.min = minPrice;
   };
-
-  typeField.addEventListener('change', function (evt) {
-    setPriceFieldParams(MinPrices[evt.target.value]);
-  });
 
   /**
    * Установка параметра value указанного поля
@@ -78,14 +74,6 @@
    */
   var setTimeField = function (field, value) {
     field.value = value;
-  };
-
-  var checkInFieldChangehandler = function (evt) {
-    setTimeField(checkOutField, evt.target.value);
-  };
-
-  var checkOutFieldChangeHandler = function (evt) {
-    setTimeField(checkInField, evt.target.value);
   };
 
   /**
@@ -110,29 +98,43 @@
     addressField.value = address.x + ', ' + address.y;
   };
 
-  roomsNumberField.addEventListener('change', function (evt) {
+  var typeChangeHandler = function (evt) {
+    setPriceParams(MinPrices[evt.target.value]);
+  };
+
+  var roomNumberChangeHandler = function (evt) {
     setCapacity(evt.target.value);
-  });
+  };
+
+  var checkInChangehandler = function (evt) {
+    setTimeField(checkOutField, evt.target.value);
+  };
+
+  var checkOutChangeHandler = function (evt) {
+    setTimeField(checkInField, evt.target.value);
+  };
 
   var formInvalidHandler = function (evt) {
     evt.target.parentNode.classList.add('ad-form__element--invalid');
-    evt.target.addEventListener('keydown', invalidHandler);
-    evt.target.addEventListener('change', invalidHandler);
+    evt.target.addEventListener('keydown', fieldInvalidHandler);
+    evt.target.addEventListener('change', fieldInvalidHandler);
   };
 
-  var invalidHandler = function (evt) {
+  var fieldInvalidHandler = function (evt) {
     if (evt.target.checkValidity()) {
       evt.target.parentNode.classList.remove('ad-form__element--invalid');
-      evt.target.removeEventListener('keydown', invalidHandler);
-      evt.target.removeEventListener('change', invalidHandler);
+      evt.target.removeEventListener('keydown', fieldInvalidHandler);
+      evt.target.removeEventListener('change', fieldInvalidHandler);
     }
   };
 
   resetButton.addEventListener('click', function (evt) {
     evt.preventDefault();
     form.removeEventListener('invalid', formInvalidHandler);
-    checkInField.removeEventListener('change', checkInFieldChangehandler);
-    checkOutField.removeEventListener('change', checkOutFieldChangeHandler);
+    typeField.removeEventListener('change', typeChangeHandler);
+    roomsNumberField.removeEventListener('change', roomNumberChangeHandler);
+    checkInField.removeEventListener('change', checkInChangehandler);
+    checkOutField.removeEventListener('change', checkOutChangeHandler);
     resetForm();
     window.pin.remove();
     window.map.deactivate();
@@ -146,8 +148,10 @@
     },
     enable: function () {
       form.addEventListener('invalid', formInvalidHandler, true);
-      checkInField.addEventListener('change', checkInFieldChangehandler);
-      checkOutField.addEventListener('change', checkOutFieldChangeHandler);
+      typeField.addEventListener('change', typeChangeHandler);
+      roomsNumberField.addEventListener('change', roomNumberChangeHandler);
+      checkInField.addEventListener('change', checkInChangehandler);
+      checkOutField.addEventListener('change', checkOutChangeHandler);
       enableFieldsets();
       setCapacity(roomsNumberField.value);
     }

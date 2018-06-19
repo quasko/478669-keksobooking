@@ -49,7 +49,6 @@
   var moveMainPin = function (x, y) {
     mainPin.style.top = y + 'px';
     mainPin.style.left = x + 'px';
-    window.form.setAddress(getMainPinAddress());
   };
 
   /**
@@ -116,6 +115,7 @@
       };
 
       moveMainPin(newCoords.x, newCoords.y);
+      window.form.setAddress(getMainPinAddress());
     };
 
     var mouseUpHandler = function (upEvt) {
@@ -149,7 +149,6 @@
       window.card.deactivate();
       window.pin.deactivate();
       window.form.setAddress(getMainPinAddress());
-    },
-    getMainPinAddress: getMainPinAddress
+    }
   };
 })();
