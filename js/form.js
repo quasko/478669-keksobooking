@@ -80,24 +80,22 @@
     field.value = value;
   };
 
-  checkInField.addEventListener('change', function (evt) {
+  var checkInFieldChangehandler = function (evt) {
     setTimeField(checkOutField, evt.target.value);
-  });
+  };
 
-  checkOutField.addEventListener('change', function (evt) {
+  var checkOutFieldChangeHandler = function (evt) {
     setTimeField(checkInField, evt.target.value);
-  });
+  };
 
   /**
    * установка возможных вариантов выбора количества мест в соответствии с количеством комнат
    * @param {string} roomsValue - текущее значение количества комнат
    */
   var setCapacity = function (roomsValue) {
-    var capacityOptions = capacityField.options;
-
-    for (var i = 0; i < capacityOptions.length; i++) {
-      capacityOptions[i].disabled = !RoomsCapacity[roomsValue].includes(capacityOptions[i].value);
-    }
+    Array.from(capacityField.options).forEach(function (item) {
+      item.disabled = !RoomsCapacity[roomsValue].includes(item.value);
+    });
 
     if (capacityField.options[capacityField.selectedIndex].disabled) {
       capacityField.value = RoomsCapacity[roomsValue][0];
@@ -116,11 +114,11 @@
     setCapacity(evt.target.value);
   });
 
-  form.addEventListener('invalid', function (evt) {
+  var formInvalidHandler = function (evt) {
     evt.target.parentNode.classList.add('ad-form__element--invalid');
     evt.target.addEventListener('keydown', invalidHandler);
     evt.target.addEventListener('change', invalidHandler);
-  }, true);
+  };
 
   var invalidHandler = function (evt) {
     if (evt.target.checkValidity()) {
@@ -132,10 +130,13 @@
 
   resetButton.addEventListener('click', function (evt) {
     evt.preventDefault();
+    form.removeEventListener('invalid', formInvalidHandler);
+    checkInField.removeEventListener('change', checkInFieldChangehandler);
+    checkOutField.removeEventListener('change', checkOutFieldChangeHandler);
     resetForm();
-    window.pins.removePins();
-    window.page.deactivatePage();
-    window.page.initPage();
+    window.pin.remove();
+    window.map.deactivate();
+    window.map.init();
     setCapacity(roomsNumberField.value);
   });
 
@@ -143,7 +144,10 @@
     setAddress: function (address) {
       setAddress(address);
     },
-    enableForm: function () {
+    enable: function () {
+      form.addEventListener('invalid', formInvalidHandler, true);
+      checkInField.addEventListener('change', checkInFieldChangehandler);
+      checkOutField.addEventListener('change', checkOutFieldChangeHandler);
       enableFieldsets();
       setCapacity(roomsNumberField.value);
     }

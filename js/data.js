@@ -72,50 +72,6 @@
   };
 
   /**
-   * расположение элементов массива в случайном порядке.
-   * @param {Array} array - массив в котором нужно изменить порядок элементов на случайный.
-   * @return {Array}
-   */
-  var shuffleArray = function (array) {
-    for (var i = array.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var temp = array[i];
-      array[i] = array[j];
-      array[j] = temp;
-    }
-
-    return array;
-  };
-
-  /**
-   * генерация случайного числа в указанном диапазоне.
-   * @param {number} minValue - миниальное значение из диапазона.
-   * @param {number} maxValue - максимальное значение из диапазона.
-   * @return {number}
-   */
-  var getRandomInteger = function (minValue, maxValue) {
-    return Math.round(Math.random() * (maxValue - minValue)) + minValue;
-  };
-
-  /**
-   * получение случайного элемента массива.
-   * @param {Array} array - массив из которого нужно получить случайный элемент.
-   * @return {*}
-   */
-  var getRandomArrayItem = function (array) {
-    return array[getRandomInteger(0, array.length - 1)];
-  };
-
-  /**
-   * получение случайного количества элементов массива.
-   * @param {Array} array - массив, из которого нужно взять элементы.
-   * @return {Array}
-   */
-  var sliceArrayRandomly = function (array) {
-    return array.slice(0, getRandomInteger(1, array.length - 1));
-  };
-
-  /**
    * получение пути к файлу аватара по индексу.
    * @param {number} index - индекс аватара.
    * @return {string}
@@ -131,8 +87,8 @@
    * @return {Advert}
    */
   var generateAdvertItem = function (index) {
-    var locationX = getRandomInteger(locationParams.x.MIN, locationParams.x.MAX);
-    var locationY = getRandomInteger(locationParams.y.MIN, locationParams.y.MAX);
+    var locationX = window.utils.getRandomInteger(locationParams.x.MIN, locationParams.x.MAX);
+    var locationY = window.utils.getRandomInteger(locationParams.y.MIN, locationParams.y.MAX);
     var advert = {
       author: {
         avatar: getAvatarPath(index + 1)
@@ -140,15 +96,15 @@
       offer: {
         title: offerParams.TITLES[index],
         address: locationX + ', ' + locationY,
-        price: getRandomInteger(offerParams.priceParams.MIN, offerParams.priceParams.MAX),
-        type: getRandomArrayItem(offerParams.TYPES),
-        rooms: getRandomInteger(offerParams.roomsCount.MIN, offerParams.roomsCount.MAX),
-        guests: getRandomInteger(offerParams.guestsCount.MIN, offerParams.guestsCount.MAX),
-        checkin: getRandomArrayItem(offerParams.CHECK_TIMES),
-        checkout: getRandomArrayItem(offerParams.CHECK_TIMES),
-        features: sliceArrayRandomly(shuffleArray(offerParams.FEATURES)),
+        price: window.utils.getRandomInteger(offerParams.priceParams.MIN, offerParams.priceParams.MAX),
+        type: window.utils.getRandomArrayItem(offerParams.TYPES),
+        rooms: window.utils.getRandomInteger(offerParams.roomsCount.MIN, offerParams.roomsCount.MAX),
+        guests: window.utils.getRandomInteger(offerParams.guestsCount.MIN, offerParams.guestsCount.MAX),
+        checkin: window.utils.getRandomArrayItem(offerParams.CHECK_TIMES),
+        checkout: window.utils.getRandomArrayItem(offerParams.CHECK_TIMES),
+        features: window.utils.sliceArrayRandomly(offerParams.FEATURES),
         description: '',
-        photos: shuffleArray(offerParams.PHOTOS)
+        photos: window.utils.shuffleArray(offerParams.PHOTOS)
       },
       location: {
         x: locationX,
@@ -159,22 +115,5 @@
     return advert;
   };
 
-  /**
-   * генерация массива случайных элементов.
-   * @param {number} count - количество объявлений.
-   * @return {Array.<Advert>}
-   */
-  var generateAdverts = function (count) {
-    var adverts = [];
-    for (var i = 0; i < count; i++) {
-      adverts.push(generateAdvertItem(i));
-    }
-
-    return adverts;
-  };
-
-  window.data = {
-    generateAdverts: generateAdverts
-  };
-
+  window.generateAdvertItem = generateAdvertItem;
 })();

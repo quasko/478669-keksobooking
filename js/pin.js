@@ -3,7 +3,6 @@
 (function () {
   var ADVERTS_COUNT = 8;
   var template = document.querySelector('template').content;
-  var mapPinsElement = document.querySelector('.map__pins');
   var mapPinSize = {
     WIDTH: 50,
     HEIGHT: 70
@@ -42,15 +41,26 @@
       if (!evt.currentTarget.classList.contains('map__pin--active')) {
         mapPinStatus.deactivatePin();
         mapPinStatus.activatePin(evt.currentTarget);
-
-        /* var newCard = createMapCardElement(mapPin);
-        renderCard(newCard); */
-        window.card.renderMapCard(mapPin);
+        window.card.render(mapPin);
       }
     });
 
     mapPins.push(mapPinElement);
     return mapPinElement;
+  };
+
+  /**
+   * генерация массива случайных элементов.
+   * @param {number} count - количество объявлений.
+   * @return {Array.<Advert>}
+   */
+  var generateAdverts = function (count) {
+    var adverts = [];
+    for (var i = 0; i < count; i++) {
+      adverts.push(window.generateAdvertItem(i));
+    }
+
+    return adverts;
   };
 
   /**
@@ -67,16 +77,16 @@
     return fragment;
   };
 
-  window.pins = {
-    renderMapPins: function () {
-      var adverts = window.data.generateAdverts(ADVERTS_COUNT);
+  window.pin = {
+    render: function () {
+      var adverts = generateAdverts(ADVERTS_COUNT);
       var mapPinFragment = createMapPinFragment(adverts);
-      mapPinsElement.appendChild(mapPinFragment);
+      return mapPinFragment;
     },
-    deactivatePin: function () {
+    deactivate: function () {
       mapPinStatus.deactivatePin();
     },
-    removePins: function () {
+    remove: function () {
       mapPins.forEach(function (item) {
         item.remove();
       });
