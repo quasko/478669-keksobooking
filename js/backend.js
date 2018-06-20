@@ -18,7 +18,7 @@
     });
 
     xhr.addEventListener('error', function () {
-      onError('Произошла ошибка соединения');
+      onError('Произошла ошибка соединения. Статус ответа: ' + xhr.status + ' ' + xhr.statusText);
     });
 
     xhr.addEventListener('timeout', function () {
@@ -38,7 +38,7 @@
     load: function (onLoad, onError) {
       createXHR('GET', GET_URL, onLoad, onError);
     },
-    send: function (data, onLoad, onError) {
+    upload: function (data, onLoad, onError) {
       createXHR('POST', POST_URL, onLoad, onError, data);
     }
   };

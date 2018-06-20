@@ -29,12 +29,12 @@
   var mapPinsElement = document.querySelector('.map__pins');
   var form = document.querySelector('.ad-form');
 
-  var successHandler = function (adverts) {
+  var loadSuccessHandler = function (adverts) {
     mapPinsElement.appendChild(window.pin.render(adverts));
   };
 
-  var errorHandler = function (errorMessage) {
-    document.body.insertAdjacentElement('afterbegin', window.utils.createErrorMessage(errorMessage));
+  var loadErrorHandler = function (errorMessage) {
+    document.body.insertAdjacentElement('afterbegin', window.createErrorMessage(errorMessage));
   };
 
   /**
@@ -44,7 +44,7 @@
     mapElement.classList.remove('map--faded');
     form.classList.remove('ad-form--disabled');
     window.form.enable();
-    window.backend.load(successHandler, errorHandler);
+    window.backend.load(loadSuccessHandler, loadErrorHandler);
     pageActivated = true;
   };
 

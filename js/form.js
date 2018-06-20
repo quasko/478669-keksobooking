@@ -144,7 +144,7 @@
     window.utils.isEscEvent(evt, closeSuccess);
   };
 
-  var successHandler = function () {
+  var submitSuccessHandler = function () {
     successMessage.classList.remove('hidden');
     document.addEventListener('click', closeSuccess);
     document.activeElement.blur();
@@ -155,14 +155,14 @@
     window.map.init();
   };
 
-  var errorHandler = function (errorMessage) {
-    document.body.insertAdjacentElement('afterbegin', window.utils.createErrorMessage(errorMessage));
+  var submitErrorHandler = function (errorMessage) {
+    document.body.insertAdjacentElement('afterbegin', window.createErrorMessage(errorMessage));
   };
 
   form.addEventListener('submit', function (evt) {
     evt.preventDefault();
     var formData = new FormData(form);
-    window.backend.send(formData, successHandler, errorHandler);
+    window.backend.upload(formData, submitSuccessHandler, submitErrorHandler);
   });
 
   resetButton.addEventListener('click', function (evt) {
