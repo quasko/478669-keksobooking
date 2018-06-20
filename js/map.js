@@ -29,6 +29,14 @@
   var mapPinsElement = document.querySelector('.map__pins');
   var form = document.querySelector('.ad-form');
 
+  var successHandler = function (adverts) {
+    mapPinsElement.appendChild(window.pin.render(adverts));
+  };
+
+  var errorHandler = function (errorMessage) {
+    document.body.insertAdjacentElement('afterbegin', window.utils.createErrorMessage(errorMessage));
+  };
+
   /**
    * перевод формы в активное состояние
    */
@@ -36,8 +44,7 @@
     mapElement.classList.remove('map--faded');
     form.classList.remove('ad-form--disabled');
     window.form.enable();
-    mapPinsElement.appendChild(window.pin.render());
-
+    window.backend.load(successHandler, errorHandler);
     pageActivated = true;
   };
 

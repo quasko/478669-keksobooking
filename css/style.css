@@ -1222,3 +1222,32 @@ fieldset {
       -ms-transform: translateX(-50%);
           transform: translateX(-50%);
 }
+
+.error {
+  position: fixed;
+  z-index: 100;
+  margin: 0 auto;
+  text-align: center;
+  background-color: red;
+  left: 0;
+  right: 0;
+  font-size: 30px;
+}
+
+.error__close {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: 0;
+  font-size: 0;
+  border: 0;
+  background: none;
+}
+
+.error__close::after {
+  font-size: 50px;
+  line-height: 40px;
+  display: block;
+  content: "×";
+  color: #000000;
+}
