@@ -26,7 +26,6 @@
   var addressField = form.querySelector('#address');
   var typeField = form.querySelector('#type');
   var priceField = form.querySelector('#price');
-  var submitButton = form.querySelector('.ad-form__submit');
   var resetButton = form.querySelector('.ad-form__reset');
   var checkInField = form.querySelector('#timein');
   var checkOutField = form.querySelector('#timeout');
@@ -147,8 +146,8 @@
 
   var successHandler = function () {
     successMessage.classList.remove('hidden');
-    submitButton.blur();
     document.addEventListener('click', closeSuccess);
+    document.activeElement.blur();
     document.addEventListener('keydown', successEscPressHandler);
     resetForm();
     window.pin.remove();
