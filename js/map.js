@@ -147,15 +147,13 @@
 
   initPage();
 
-  window.map = {
-    reset: function () {
-      pageActivated = false;
-      mapElement.classList.add('map--faded');
-      moveMainPin(mainPinParams.defaultPosition.LEFT, mainPinParams.defaultPosition.TOP);
-      window.card.deactivate();
-      window.pin.deactivate();
-      window.form.setAddress(getMainPinAddress());
-      initPage();
-    }
+  window.resetMap = function () {
+    pageActivated = false;
+    mapElement.classList.add('map--faded');
+    moveMainPin(mainPinParams.defaultPosition.LEFT, mainPinParams.defaultPosition.TOP);
+    window.card.deactivate();
+    window.pin.deactivate();
+    window.form.setAddress(getMainPinAddress());
+    initPage();
   };
 })();
