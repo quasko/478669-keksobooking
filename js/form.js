@@ -144,7 +144,7 @@
     window.utils.isEscEvent(evt, closeSuccess);
   };
 
-  var submitSuccessHandler = function () {
+  var formSubmitSuccessHandler = function () {
     successMessage.classList.remove('hidden');
     document.addEventListener('click', closeSuccess);
     document.activeElement.blur();
@@ -155,14 +155,14 @@
     window.map.init();
   };
 
-  var submitErrorHandler = function (errorMessage) {
+  var formSubmitErrorHandler = function (errorMessage) {
     document.body.insertAdjacentElement('afterbegin', window.createErrorMessage(errorMessage));
   };
 
   form.addEventListener('submit', function (evt) {
     evt.preventDefault();
     var formData = new FormData(form);
-    window.backend.upload(formData, submitSuccessHandler, submitErrorHandler);
+    window.backend.upload(formData, formSubmitSuccessHandler, formSubmitErrorHandler);
   });
 
   resetButton.addEventListener('click', function (evt) {
