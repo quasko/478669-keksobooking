@@ -151,8 +151,7 @@
     document.addEventListener('keydown', successEscPressHandler);
     resetForm();
     window.pin.remove();
-    window.map.deactivate();
-    window.map.init();
+    window.map.reset();
   };
 
   var formSubmitErrorHandler = function (errorMessage) {
@@ -169,8 +168,7 @@
     evt.preventDefault();
     resetForm();
     window.pin.remove();
-    window.map.deactivate();
-    window.map.init();
+    window.map.reset();
   });
 
   window.form = {

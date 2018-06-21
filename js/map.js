@@ -148,14 +148,14 @@
   initPage();
 
   window.map = {
-    init: initPage,
-    deactivate: function () {
+    reset: function () {
       pageActivated = false;
       mapElement.classList.add('map--faded');
       moveMainPin(mainPinParams.defaultPosition.LEFT, mainPinParams.defaultPosition.TOP);
       window.card.deactivate();
       window.pin.deactivate();
       window.form.setAddress(getMainPinAddress());
+      initPage();
     }
   };
 })();
