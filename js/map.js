@@ -29,6 +29,14 @@
   var mapPinsElement = document.querySelector('.map__pins');
   var form = document.querySelector('.ad-form');
 
+  var loadSuccessHandler = function (adverts) {
+    mapPinsElement.appendChild(window.pin.render(adverts));
+  };
+
+  var loadErrorHandler = function (errorMessage) {
+    document.body.insertAdjacentElement('afterbegin', window.createErrorMessage(errorMessage));
+  };
+
   /**
    * перевод формы в активное состояние
    */
@@ -36,8 +44,7 @@
     mapElement.classList.remove('map--faded');
     form.classList.remove('ad-form--disabled');
     window.form.enable();
-    mapPinsElement.appendChild(window.pin.render());
-
+    window.backend.load(loadSuccessHandler, loadErrorHandler);
     pageActivated = true;
   };
 
@@ -140,15 +147,13 @@
 
   initPage();
 
-  window.map = {
-    init: initPage,
-    deactivate: function () {
-      pageActivated = false;
-      mapElement.classList.add('map--faded');
-      moveMainPin(mainPinParams.defaultPosition.LEFT, mainPinParams.defaultPosition.TOP);
-      window.card.deactivate();
-      window.pin.deactivate();
-      window.form.setAddress(getMainPinAddress());
-    }
+  window.resetMap = function () {
+    pageActivated = false;
+    mapElement.classList.add('map--faded');
+    moveMainPin(mainPinParams.defaultPosition.LEFT, mainPinParams.defaultPosition.TOP);
+    window.card.deactivate();
+    window.pin.deactivate();
+    window.form.setAddress(getMainPinAddress());
+    initPage();
   };
 })();

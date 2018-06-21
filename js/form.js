@@ -31,6 +31,7 @@
   var checkOutField = form.querySelector('#timeout');
   var roomsNumberField = form.querySelector('#room_number');
   var capacityField = form.querySelector('#capacity');
+  var successMessage = document.querySelector('.success');
 
   /**
    * активация элементов формы
@@ -54,6 +55,11 @@
   var resetForm = function () {
     form.reset();
     disableFieldsets();
+    form.removeEventListener('invalid', formInvalidHandler);
+    typeField.removeEventListener('change', typeChangeHandler);
+    roomsNumberField.removeEventListener('change', roomNumberChangeHandler);
+    checkInField.removeEventListener('change', checkInChangehandler);
+    checkOutField.removeEventListener('change', checkOutChangeHandler);
     form.classList.add('ad-form--disabled');
     setCapacity(roomsNumberField.value);
   };
@@ -128,18 +134,41 @@
     }
   };
 
-  resetButton.addEventListener('click', function (evt) {
-    evt.preventDefault();
-    form.removeEventListener('invalid', formInvalidHandler);
-    typeField.removeEventListener('change', typeChangeHandler);
-    roomsNumberField.removeEventListener('change', roomNumberChangeHandler);
-    checkInField.removeEventListener('change', checkInChangehandler);
-    checkOutField.removeEventListener('change', checkOutChangeHandler);
+  var closeSuccess = function () {
+    successMessage.classList.add('hidden');
+    document.removeEventListener('click', closeSuccess);
+    document.removeEventListener('keydown', successEscPressHandler);
+  };
+
+  var successEscPressHandler = function (evt) {
+    window.utils.isEscEvent(evt, closeSuccess);
+  };
+
+  var formSubmitSuccessHandler = function () {
+    successMessage.classList.remove('hidden');
+    document.addEventListener('click', closeSuccess);
+    document.activeElement.blur();
+    document.addEventListener('keydown', successEscPressHandler);
     resetForm();
     window.pin.remove();
-    window.map.deactivate();
-    window.map.init();
-    setCapacity(roomsNumberField.value);
+    window.resetMap();
+  };
+
+  var formSubmitErrorHandler = function (errorMessage) {
+    document.body.insertAdjacentElement('afterbegin', window.createErrorMessage(errorMessage));
+  };
+
+  form.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    var formData = new FormData(form);
+    window.backend.upload(formData, formSubmitSuccessHandler, formSubmitErrorHandler);
+  });
+
+  resetButton.addEventListener('click', function (evt) {
+    evt.preventDefault();
+    resetForm();
+    window.pin.remove();
+    window.resetMap();
   });
 
   window.form = {

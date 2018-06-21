@@ -1,7 +1,6 @@
 'use strict';
 
 (function () {
-  var ADVERTS_COUNT = 8;
   var template = document.querySelector('template').content;
   var mapPinSize = {
     WIDTH: 50,
@@ -51,20 +50,6 @@
   };
 
   /**
-   * генерация массива случайных элементов.
-   * @param {number} count - количество объявлений.
-   * @return {Array.<Advert>}
-   */
-  var generateAdverts = function (count) {
-    var adverts = [];
-    for (var i = 0; i < count; i++) {
-      adverts.push(window.generateAdvertItem(i));
-    }
-
-    return adverts;
-  };
-
-  /**
    * создание фрагмента содержащего метки на карте.
    * @param {Array.<Advert>} array - массив с параметрами меток на карте.
    * @return {Node}
@@ -79,8 +64,7 @@
   };
 
   window.pin = {
-    render: function () {
-      var adverts = generateAdverts(ADVERTS_COUNT);
+    render: function (adverts) {
       var pinsFragment = createPinsFragment(adverts);
       return pinsFragment;
     },
