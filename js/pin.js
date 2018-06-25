@@ -75,6 +75,9 @@
       mapPins.forEach(function (item) {
         item.remove();
       });
+    },
+    filter: function () {
+      console.log(pinStatus.activeNode);
     }
   };
 })();

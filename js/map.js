@@ -31,6 +31,8 @@
 
   var loadSuccessHandler = function (adverts) {
     mapPinsElement.appendChild(window.pin.render(adverts));
+    window.filter.enable();
+    window.filter.saveAdverts(adverts);
   };
 
   var loadErrorHandler = function (errorMessage) {
@@ -150,10 +152,15 @@
   window.resetMap = function () {
     pageActivated = false;
     mapElement.classList.add('map--faded');
+    window.filter.disable();
     moveMainPin(mainPinParams.defaultPosition.LEFT, mainPinParams.defaultPosition.TOP);
     window.card.deactivate();
     window.pin.deactivate();
     window.form.setAddress(getMainPinAddress());
     initPage();
+  };
+
+  window.filterPin = function (adverts) {
+    mapPinsElement.appendChild(window.pin.render(adverts));
   };
 })();
