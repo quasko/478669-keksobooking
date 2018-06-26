@@ -81,6 +81,63 @@
     return filterState;
   };
 
+  /**
+   * проверка соответствия выбранного типа и типа в объявлении
+   * @param {string} filterType - выбранный тип жилья
+   * @param {string} offerType - тип жилья в объявлении
+   * @return {boolean}
+   */
+  var checkFilterType = function (filterType, offerType) {
+    return filterType === offerType || filterType === 'any';
+  };
+
+  /**
+   * проверка соответствия выбранной цены и цены в объявлении
+   * @param {string} filterPrice - выбранный диапазон цены
+   * @param {number} offerPrice - цена в объявлении
+   * @return {boolean}
+   */
+  var checkFilterPrice = function (filterPrice, offerPrice) {
+
+    return (filterPrice === 'low' && offerPrice < price.LOW) ||
+      (filterPrice === 'middle' && (offerPrice >= price.LOW && offerPrice <= price.HIGH)) ||
+      (filterPrice === 'high' && offerPrice > price.HIGH) ||
+      (filterPrice === 'any');
+
+  };
+
+  /**
+   * проверка соответствия выбранного количества комнат и количества комнат в объявлении
+   * @param {string} filterRooms - выбранное количество комнат
+   * @param {number} offerRooms - количество комнат в объявлении
+   * @return {boolean}
+   */
+  var checkFilterRooms = function (filterRooms, offerRooms) {
+    return filterRooms === offerRooms.toString() || filterRooms === 'any';
+  };
+
+  /**
+   * проверка соответствия выбранного количества гостей и количества гостей в объявлении
+   * @param {string} filterGuests - выбранное количество гостей
+   * @param {number} offerGuests - количество гостей в объявлении
+   * @return {boolean}
+   */
+  var checkFilterGuests = function (filterGuests, offerGuests) {
+    return filterGuests === offerGuests.toString() || filterGuests === 'any';
+  };
+
+  /**
+   * проверка соответствия выбранных удобств и удобств в объявлении
+   * @param {Array.<string>} filterFeatures - массив с выбранными удобствами
+   * @param {Array.<string>} offerFeatures - массив с удобствами в объявлении
+   * @return {boolean}
+   */
+  var checkFilterFeatures = function (filterFeatures, offerFeatures) {
+    return filterFeatures.every(function (feature) {
+      return offerFeatures.includes(feature);
+    });
+  };
+
   var filterChangeHandler = window.utils.debounce(function () {
     var filterState = checkfilterState();
 
@@ -89,31 +146,11 @@
     advertsFiltered = advertsDefault.filter(function (item) {
       var offer = item.offer;
 
-      if (filterState.type !== offer.type && filterState.type !== 'any') {
-        return false;
-      }
-
-      if (((filterState.price === 'low' && offer.price >= price.LOW) ||
-        (filterState.price === 'middle' && (offer.price < price.LOW || offer.price > price.HIGH)) ||
-        (filterState.price === 'high' && offer.price <= price.HIGH)) && (filterState.price !== 'any')) {
-        return false;
-      }
-
-      if (filterState.rooms !== offer.rooms.toString() && filterState.rooms !== 'any') {
-        return false;
-      }
-
-      if (filterState.guests !== offer.guests.toString() && filterState.guests !== 'any') {
-        return false;
-      }
-
-      if (!filterState.features.every(function (feature) {
-        return offer.features.includes(feature);
-      })) {
-        return false;
-      }
-
-      return true;
+      return checkFilterType(filterState.type, offer.type) &&
+        checkFilterPrice(filterState.price, offer.price) &&
+        checkFilterRooms(filterState.rooms, offer.rooms) &&
+        checkFilterGuests(filterState.guests, offer.guests) &&
+        checkFilterFeatures(filterState.features, offer.features);
     });
 
     window.pin.remove();
@@ -123,7 +160,7 @@
   window.filter = {
     disable: disableFilters,
     enable: enableFilters,
-    saveAdverts: function (adverts) {
+    copyAdverts: function (adverts) {
       advertsDefault = adverts.slice();
     }
   };

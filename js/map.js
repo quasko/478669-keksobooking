@@ -33,7 +33,7 @@
   var loadSuccessHandler = function (adverts) {
     mapPinsElement.appendChild(window.pin.render(adverts.slice(0, DISPLAYED_ADVERTS)));
     window.filter.enable();
-    window.filter.saveAdverts(adverts);
+    window.filter.copyAdverts(adverts);
   };
 
   var loadErrorHandler = function (errorMessage) {
