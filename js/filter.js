@@ -19,21 +19,31 @@
     Array.from(filter.elements).forEach(function (item) {
       item.disabled = true;
     });
+    filter.removeEventListener('change', filterChangeHandler);
   };
 
   var enableFilters = function () {
     Array.from(filter.elements).forEach(function (item) {
       item.disabled = false;
     });
+    filter.addEventListener('change', filterChangeHandler);
   };
 
   disableFilters();
 
   /**
+   * @typedef {Object} Filter - объект с параметрами выбранных фильтров
+   * @param {string} type - тип жилья
+   * @param {string} price - цена за ночь
+   * @param {string} rooms - количество комнат
+   * @param {string} guests - количество гостей
+   * @param {Array.<string>} features - массив со списком удобств
+   */
+
+  /**
    * проверка всех полей фильтра
    * @return {Filter}
    */
-
   var checkfilterState = function () {
     var filterState = {
       type: 'any',
@@ -71,14 +81,12 @@
     return filterState;
   };
 
-  filter.addEventListener('change', function () {
+  var filterChangeHandler = window.utils.debounce(function () {
+    var filterState = checkfilterState();
+
     window.card.deactivate();
 
-    var filterState = checkfilterState();
-    console.log(filterState);
-
     advertsFiltered = advertsDefault.filter(function (item) {
-
       var offer = item.offer;
 
       if (filterState.type !== offer.type && filterState.type !== 'any') {
@@ -87,7 +95,7 @@
 
       if (((filterState.price === 'low' && offer.price >= price.LOW) ||
         (filterState.price === 'middle' && (offer.price < price.LOW || offer.price > price.HIGH)) ||
-        (filterState.price === 'high' && offer.price < price.HIGH)) && (filterState.price !== 'any')) {
+        (filterState.price === 'high' && offer.price <= price.HIGH)) && (filterState.price !== 'any')) {
         return false;
       }
 
@@ -109,9 +117,7 @@
     });
 
     window.pin.remove();
-    window.filterPin(advertsFiltered.slice(0, SIMILAR_OFFERS_COUNT));
-    //console.log(adrertsFiltered);
-
+    window.map.filter(advertsFiltered.slice(0, SIMILAR_OFFERS_COUNT));
   });
 
   window.filter = {
@@ -121,5 +127,4 @@
       advertsDefault = adverts.slice();
     }
   };
-
 })();

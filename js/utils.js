@@ -2,6 +2,7 @@
 
 (function () {
   var ESC_KEYCODE = 27;
+  var DEBOUNCE_TIMEOUT = 500;
 
   /**
    * определение правильной формы множественного числа существительного
@@ -28,6 +29,18 @@
       if (evt.keyCode === ESC_KEYCODE) {
         action();
       }
+    },
+    debounce: function (callback) {
+      var timeout = null;
+      var context = this;
+      var args = arguments;
+
+      return function () {
+        clearTimeout(timeout);
+        timeout = setTimeout(function () {
+          callback.apply(context, args);
+        }, DEBOUNCE_TIMEOUT);
+      };
     }
   };
 })();

@@ -1,6 +1,7 @@
 'use strict';
 
 (function () {
+  var DISPLAYED_ADVERTS = 5;
 
   var mainPinParams = {
     defaultPosition: {
@@ -30,7 +31,7 @@
   var form = document.querySelector('.ad-form');
 
   var loadSuccessHandler = function (adverts) {
-    mapPinsElement.appendChild(window.pin.render(adverts));
+    mapPinsElement.appendChild(window.pin.render(adverts.slice(0, DISPLAYED_ADVERTS)));
     window.filter.enable();
     window.filter.saveAdverts(adverts);
   };
@@ -59,6 +60,12 @@
     mainPin.style.top = y + 'px';
     mainPin.style.left = x + 'px';
   };
+
+  /**
+   * @typedef {Object} Coordinates - координаты метки mainPin
+   * @param {number} x - координата X
+   * @param {number} y - координата Y
+   */
 
   /**
    * вычисление адреса метки mainPin на карте
@@ -149,18 +156,19 @@
 
   initPage();
 
-  window.resetMap = function () {
-    pageActivated = false;
-    mapElement.classList.add('map--faded');
-    window.filter.disable();
-    moveMainPin(mainPinParams.defaultPosition.LEFT, mainPinParams.defaultPosition.TOP);
-    window.card.deactivate();
-    window.pin.deactivate();
-    window.form.setAddress(getMainPinAddress());
-    initPage();
-  };
-
-  window.filterPin = function (adverts) {
-    mapPinsElement.appendChild(window.pin.render(adverts));
+  window.map = {
+    reset: function () {
+      pageActivated = false;
+      mapElement.classList.add('map--faded');
+      window.filter.disable();
+      moveMainPin(mainPinParams.defaultPosition.LEFT, mainPinParams.defaultPosition.TOP);
+      window.card.deactivate();
+      window.pin.deactivate();
+      window.form.setAddress(getMainPinAddress());
+      initPage();
+    },
+    filter: function (adverts) {
+      mapPinsElement.appendChild(window.pin.render(adverts));
+    }
   };
 })();
