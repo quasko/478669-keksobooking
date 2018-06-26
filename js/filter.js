@@ -103,7 +103,6 @@
       (filterPrice === 'middle' && (offerPrice >= price.LOW && offerPrice <= price.HIGH)) ||
       (filterPrice === 'high' && offerPrice > price.HIGH) ||
       (filterPrice === 'any');
-
   };
 
   /**
