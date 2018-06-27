@@ -13,51 +13,46 @@
   var advertsFiltered = [];
 
   var filter = document.querySelector('.map__filters');
-  var features = filter.querySelector('.map__features');
+
+  var filterField = {
+    type: filter.querySelector('#housing-type'),
+    price: filter.querySelector('#housing-price'),
+    rooms: filter.querySelector('#housing-rooms'),
+    guests: filter.querySelector('#housing-guests'),
+    features: filter.querySelector('#housing-features'),
+  };
+
+  var PriceRange = {
+    'low': function (value) {
+      return value < price.LOW;
+    },
+    'middle': function (value) {
+      return value >= price.LOW && value <= price.HIGH;
+    },
+    'high': function (value) {
+      return value > price.HIGH;
+    },
+    'any': function () {
+      return true;
+    }
+  };
 
   var disableFilters = function () {
     Array.from(filter.elements).forEach(function (item) {
       item.disabled = true;
     });
-    //filter.removeEventListener('change', filterChangeHandler);
+    filter.removeEventListener('change', filterChangeHandler);
   };
 
   var enableFilters = function () {
     Array.from(filter.elements).forEach(function (item) {
       item.disabled = false;
     });
-    //ilter.addEventListener('change', filterChangeHandler);
-    filter.addEventListener('change', filterHandler);
-
+    filter.addEventListener('change', filterChangeHandler);
   };
-
-  var filterHandler = function (evt) {
-    //console.log(evt.target.name, evt.target.value);
-
-
-    var FilterSelectDict = {
-      'housing-type': 'type',
-      'housing-price': 'price',
-      'housing-rooms': 'rooms',
-      'housing-guests': 'guests',
-      'features': 'features'
-    };
-
-    var checkedFeatures = Array.from(document.querySelectorAll('[name=features]:checked')).map(function (item) {
-      return item.value;
-    });
-    //console.log(checkedFeatures);
-
-    advertsDefault.forEach(function (item) {
-      var offer = item.offer;
-      console.log(offer[FilterSelectDict[evt.target.name]]);
-    });
-  };
-
-  disableFilters();
 
   /**
-   * @typedef {Object} Filter - объект с параметрами выбранных фильтров
+   * @typedef {Object} Offer - объект с параметрами объявления
    * @param {string} type - тип жилья
    * @param {string} price - цена за ночь
    * @param {string} rooms - количество комнат
@@ -66,120 +61,53 @@
    */
 
   /**
-   * проверка всех полей фильтра
-   * @return {Filter}
-   */
-  var checkfilterState = function () {
-    var filterState = {
-      type: 'any',
-      price: 'any',
-      rooms: 'any',
-      guests: 'any',
-      features: []
-    };
-
-    Array.from(filter.elements).forEach(function (item) {
-
-      if (item.tagName === 'FIELDSET') {
-        return;
-      }
-
-      var key = item.name.includes('-') ?
-        item.name.split('-')[1] :
-        item.name;
-
-      var value = item.value;
-
-      if (key === 'features') {
-        filterState[key] = Array.from(features.elements)
-        .filter(function (feature) {
-          return feature.checked;
-        })
-        .map(function (feature) {
-          return feature.value;
-        });
-      } else {
-        filterState[key] = value;
-      }
-    });
-
-    return filterState;
-  };
-
-  /**
-   * проверка соответствия выбранного типа и типа в объявлении
-   * @param {string} filterType - выбранный тип жилья
-   * @param {string} offerType - тип жилья в объявлении
+   * проверка соответствия выбранного фильтра и поля в объявлении, применяется для полей тип, количество комнат, количество гостей
+   * @param {string} field - название фильтра
+   * @param {Offer} offer - объект с параметрами объявления
    * @return {boolean}
    */
-  var checkFilterType = function (filterType, offerType) {
-    return filterType === offerType || filterType === 'any';
-  };
-
-  /**
-   * проверка соответствия выбранной цены и цены в объявлении
-   * @param {string} filterPrice - выбранный диапазон цены
-   * @param {number} offerPrice - цена в объявлении
-   * @return {boolean}
-   */
-  var checkFilterPrice = function (filterPrice, offerPrice) {
-
-    return (filterPrice === 'low' && offerPrice < price.LOW) ||
-      (filterPrice === 'middle' && (offerPrice >= price.LOW && offerPrice <= price.HIGH)) ||
-      (filterPrice === 'high' && offerPrice > price.HIGH) ||
-      (filterPrice === 'any');
-  };
-
-  /**
-   * проверка соответствия выбранного количества комнат и количества комнат в объявлении
-   * @param {string} filterRooms - выбранное количество комнат
-   * @param {number} offerRooms - количество комнат в объявлении
-   * @return {boolean}
-   */
-  var checkFilterRooms = function (filterRooms, offerRooms) {
-    return filterRooms === offerRooms.toString() || filterRooms === 'any';
-  };
-
-  /**
-   * проверка соответствия выбранного количества гостей и количества гостей в объявлении
-   * @param {string} filterGuests - выбранное количество гостей
-   * @param {number} offerGuests - количество гостей в объявлении
-   * @return {boolean}
-   */
-  var checkFilterGuests = function (filterGuests, offerGuests) {
-    return filterGuests === offerGuests.toString() || filterGuests === 'any';
-  };
-
-  /**
-   * проверка соответствия выбранных удобств и удобств в объявлении
-   * @param {Array.<string>} filterFeatures - массив с выбранными удобствами
-   * @param {Array.<string>} offerFeatures - массив с удобствами в объявлении
-   * @return {boolean}
-   */
-  var checkFilterFeatures = function (filterFeatures, offerFeatures) {
-    return filterFeatures.every(function (feature) {
-      return offerFeatures.includes(feature);
-    });
+  var checkFilter = function (field, offer) {
+    return filterField[field].value === offer[field].toString() || filterField[field].value === 'any';
   };
 
   var filterChangeHandler = window.utils.debounce(function () {
-    var filterState = checkfilterState();
-
     window.card.deactivate();
 
-    advertsFiltered = advertsDefault.filter(function (item) {
-      var offer = item.offer;
+    var checkedFeatures = Array.from(filterField.features.elements)
+      .filter(function (item) {
+        return item.checked;
+      })
+      .map(function (item) {
+        return item.value;
+      });
 
-      return checkFilterType(filterState.type, offer.type) &&
-        checkFilterPrice(filterState.price, offer.price) &&
-        checkFilterRooms(filterState.rooms, offer.rooms) &&
-        checkFilterGuests(filterState.guests, offer.guests) &&
-        checkFilterFeatures(filterState.features, offer.features);
+    advertsFiltered = advertsDefault.filter(function (item) {
+      return checkFilter('type', item.offer);
+    });
+
+    advertsFiltered = advertsFiltered.filter(function (item) {
+      return PriceRange[filterField.price.value](item.offer.price) || filterField.price.value === 'any';
+    });
+
+    advertsFiltered = advertsFiltered.filter(function (item) {
+      return checkFilter('rooms', item.offer);
+    });
+
+    advertsFiltered = advertsFiltered.filter(function (item) {
+      return checkFilter('guests', item.offer);
+    });
+
+    advertsFiltered = advertsFiltered.filter(function (item) {
+      return checkedFeatures.every(function (feature) {
+        return item.offer.features.includes(feature);
+      });
     });
 
     window.pin.remove();
     window.map.filter(advertsFiltered.slice(0, SIMILAR_OFFERS_COUNT));
   });
+
+  disableFilters();
 
   window.filter = {
     disable: disableFilters,
