@@ -1,7 +1,14 @@
 'use strict';
 
 (function () {
+  /**
+   * @constant {number}
+   */
   var ESC_KEYCODE = 27;
+
+  /**
+   * @constant {number}
+   */
   var DEBOUNCE_INTERVAL = 500;
 
   /**

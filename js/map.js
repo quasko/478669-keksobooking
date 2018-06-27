@@ -1,6 +1,9 @@
 'use strict';
 
 (function () {
+  /**
+   * @constant {numner}
+   */
   var DISPLAYED_ADVERTS = 5;
 
   var mainPinParams = {

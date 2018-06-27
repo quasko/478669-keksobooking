@@ -1,10 +1,15 @@
 'use strict';
 
 (function () {
-
+  /**
+   * @constant {number}
+   */
   var SIMILAR_OFFERS_COUNT = 5;
 
-  var price = {
+  /**
+   * @enum {number} Price - границы диапазона цены за ночь
+   */
+  var Price = {
     LOW: 10000,
     HIGH: 50000
   };
@@ -13,24 +18,29 @@
   var advertsFiltered = [];
 
   var filter = document.querySelector('.map__filters');
+  var filterType = filter.querySelector('#housing-type');
+  var filterPrice = filter.querySelector('#housing-price');
+  var filterRooms = filter.querySelector('#housing-rooms');
+  var filterGuests = filter.querySelector('#housing-guests');
+  var filterFeatures = filter.querySelector('#housing-features');
 
   var filterField = {
-    type: filter.querySelector('#housing-type'),
-    price: filter.querySelector('#housing-price'),
-    rooms: filter.querySelector('#housing-rooms'),
-    guests: filter.querySelector('#housing-guests'),
-    features: filter.querySelector('#housing-features'),
+    type: filterType,
+    price: filterPrice,
+    rooms: filterRooms,
+    guests: filterGuests,
+    features: filterFeatures
   };
 
   var PriceRange = {
     'low': function (value) {
-      return value < price.LOW;
+      return value < Price.LOW;
     },
     'middle': function (value) {
-      return value >= price.LOW && value <= price.HIGH;
+      return value >= Price.LOW && value <= Price.HIGH;
     },
     'high': function (value) {
-      return value > price.HIGH;
+      return value > Price.HIGH;
     },
     'any': function () {
       return true;
@@ -73,10 +83,7 @@
   var filterChangeHandler = window.utils.debounce(function () {
     window.card.deactivate();
 
-    var checkedFeatures = Array.from(filterField.features.elements)
-      .filter(function (item) {
-        return item.checked;
-      })
+    var checkedFeatures = Array.from(filterFeatures.querySelectorAll('[name = "features"]:checked'))
       .map(function (item) {
         return item.value;
       });
