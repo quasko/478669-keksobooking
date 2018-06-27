@@ -19,14 +19,39 @@
     Array.from(filter.elements).forEach(function (item) {
       item.disabled = true;
     });
-    filter.removeEventListener('change', filterChangeHandler);
+    //filter.removeEventListener('change', filterChangeHandler);
   };
 
   var enableFilters = function () {
     Array.from(filter.elements).forEach(function (item) {
       item.disabled = false;
     });
-    filter.addEventListener('change', filterChangeHandler);
+    //ilter.addEventListener('change', filterChangeHandler);
+    filter.addEventListener('change', filterHandler);
+
+  };
+
+  var filterHandler = function (evt) {
+    //console.log(evt.target.name, evt.target.value);
+
+
+    var FilterSelectDict = {
+      'housing-type': 'type',
+      'housing-price': 'price',
+      'housing-rooms': 'rooms',
+      'housing-guests': 'guests',
+      'features': 'features'
+    };
+
+    var checkedFeatures = Array.from(document.querySelectorAll('[name=features]:checked')).map(function (item) {
+      return item.value;
+    });
+    //console.log(checkedFeatures);
+
+    advertsDefault.forEach(function (item) {
+      var offer = item.offer;
+      console.log(offer[FilterSelectDict[evt.target.name]]);
+    });
   };
 
   disableFilters();
