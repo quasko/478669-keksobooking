@@ -171,6 +171,8 @@
     window.map.reset();
   });
 
+  disableFieldsets();
+
   window.form = {
     setAddress: function (address) {
       setAddress(address);
