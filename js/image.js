@@ -11,6 +11,46 @@
   var avatarInput = document.querySelector('#avatar');
   var imagesInput = document.querySelector('#images');
   var photoContainer = document.querySelector('.ad-form__photo-container');
+  var avatarDropZone = document.querySelector('.ad-form-header__drop-zone');
+  var imageDropZone = document.querySelector('.ad-form__drop-zone');
+
+  /**
+   * @enum {Node} - DropZoneInput элементы input для соответствующих элементов label загрузки изображений
+   */
+  var DropZoneInput = {
+    'avatar': avatarInput,
+    'images': imagesInput
+  };
+
+  var dragFileStartHandler = function (evt) {
+    evt.preventDefault();
+    evt.target.classList.add('drop__highlight');
+  };
+
+  var dragFileEndHandler = function (evt) {
+    evt.preventDefault();
+    evt.target.classList.remove('drop__highlight');
+  };
+
+  var dropFileHandler = function (evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+    DropZoneInput[evt.target.htmlFor].files = evt.dataTransfer.files;
+  };
+
+  var addDragDropListeners = function (element) {
+    element.addEventListener('dragenter', dragFileStartHandler);
+    element.addEventListener('dragover', dragFileStartHandler);
+    element.addEventListener('dragleave', dragFileEndHandler);
+    element.addEventListener('drop', dropFileHandler);
+  };
+
+  var removeDragDropListeners = function (element) {
+    element.removeEventListener('dragenter', dragFileStartHandler);
+    element.removeEventListener('dragover', dragFileStartHandler);
+    element.removeEventListener('dragleave', dragFileEndHandler);
+    element.removeEventListener('drop', dropFileHandler);
+  };
 
   var avatarChangeHandler = function () {
     var avatarFile = avatarInput.files[0];
@@ -51,16 +91,16 @@
       }
 
       var reader = new FileReader();
-      var newPhoto = photoPreview.cloneNode();
+
       reader.addEventListener('load', function () {
-        photoPreview.appendChild(createPhoto(reader.result));
-        photoPreview = newPhoto;
+        var newPhotoPreview = photoPreview.cloneNode();
+        newPhotoPreview.appendChild(createPhoto(reader.result));
+        photoContainer.insertBefore(newPhotoPreview, photoPreview);
       });
 
       if (file) {
         reader.readAsDataURL(file);
       }
-      photoContainer.appendChild(newPhoto);
     });
   };
 
@@ -68,10 +108,21 @@
     addListeners: function () {
       avatarInput.addEventListener('change', avatarChangeHandler);
       imagesInput.addEventListener('change', imagesChangeHandler);
+      addDragDropListeners(avatarDropZone);
+      addDragDropListeners(imageDropZone);
     },
     removeListeners: function () {
       avatarInput.removeEventListener('change', avatarChangeHandler);
       imagesInput.removeEventListener('change', imagesChangeHandler);
+      removeDragDropListeners(avatarDropZone);
+      removeDragDropListeners(imageDropZone);
+    },
+    clearImages: function () {
+      document.querySelectorAll('.ad-form__photo').forEach(function (item) {
+        item.remove();
+      });
+      photoContainer.appendChild(photoPreview);
+
     }
   };
 })();
