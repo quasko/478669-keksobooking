@@ -2,6 +2,11 @@
 
 (function () {
   /**
+   * @constant {string}
+   */
+  var DEFAULT_AVATAR_SRC = 'img/muffin-grey.svg';
+
+  /**
   * @enum {Array.<string>} RoomsCapacity - соответствия количества гостей количеству комнат
   */
   var RoomsCapacity = {
@@ -22,6 +27,7 @@
   };
 
   var form = document.querySelector('.ad-form');
+  var avatarPreview = form.querySelector('.ad-form-header__preview > img');
   var fieldsets = form.querySelectorAll('fieldset');
   var addressField = form.querySelector('#address');
   var typeField = form.querySelector('#type');
@@ -55,6 +61,11 @@
   var resetForm = function () {
     form.reset();
     disableFieldsets();
+    document.querySelectorAll('.ad-form__photo:not(:last-child)').forEach(function (item) {
+      item.remove();
+    });
+    window.image.removeListeners();
+    avatarPreview.src = DEFAULT_AVATAR_SRC;
     form.removeEventListener('invalid', formInvalidHandler);
     typeField.removeEventListener('change', typeChangeHandler);
     roomsNumberField.removeEventListener('change', roomNumberChangeHandler);
@@ -184,6 +195,7 @@
       checkInField.addEventListener('change', checkInChangehandler);
       checkOutField.addEventListener('change', checkOutChangeHandler);
       enableFieldsets();
+      window.image.addListeners();
       setCapacity(roomsNumberField.value);
     }
   };
