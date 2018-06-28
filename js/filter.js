@@ -83,10 +83,7 @@
   var filterChangeHandler = window.utils.debounce(function () {
     window.card.deactivate();
 
-    var checkedFeatures = Array.from(filterFeatures.querySelectorAll('[name = "features"]:checked'))
-      .map(function (item) {
-        return item.value;
-      });
+    var checkedFeatures = Array.from(filterFeatures.querySelectorAll('[name = "features"]:checked'));
 
     advertsFiltered = advertsDefault.filter(function (item) {
       return checkFilter('type', item.offer);
@@ -106,7 +103,7 @@
 
     advertsFiltered = advertsFiltered.filter(function (item) {
       return checkedFeatures.every(function (feature) {
-        return item.offer.features.includes(feature);
+        return item.offer.features.includes(feature.value);
       });
     });
 
