@@ -24,12 +24,12 @@
 
   var dragFileStartHandler = function (evt) {
     evt.preventDefault();
-    evt.target.classList.add('drop__highlight');
+    evt.target.classList.add('drop-highlight');
   };
 
   var dragFileEndHandler = function (evt) {
     evt.preventDefault();
-    evt.target.classList.remove('drop__highlight');
+    evt.target.classList.remove('drop-highlight');
   };
 
   var dropFileHandler = function (evt) {
