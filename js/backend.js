@@ -1,7 +1,14 @@
 'use strict';
 
 (function () {
+  /**
+   * @constant {string}
+   */
   var GET_URL = 'https://js.dump.academy/keksobooking/data';
+
+  /**
+   * @constant {string}
+   */
   var POST_URL = 'https://js.dump.academy/keksobooking';
 
   var createXHR = function (method, url, onLoad, onError, data) {

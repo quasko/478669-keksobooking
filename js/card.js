@@ -7,6 +7,39 @@
   };
 
   /**
+   * @typedef {Object} Advert - объект с параметрами карточки объявления.
+   * @param {Author} author - объект с данными автора объявления.
+   * @param {Offer} offer - объект с данными о предложении.
+   * @param {Location} location - объекс с координами метки предложения на карте.
+   */
+
+  /**
+   * @typedef {Object} Author - объект с данными автора объявления.
+   * @param {string} avatar - путь к  фото автора.
+   */
+
+  /**
+    * @typedef {Object} Offer - объект с данными о предложении.
+    * @param {string} title - заголовок предложения.
+    * @param {string} address - адрес предложения.
+    * @param {number} price - цена предложения.
+    * @param {string} type - тип предложения.
+    * @param {number} rooms - количество комнат.
+    * @param {number} guests - максимальное количество гостей.
+    * @param {string} checkin - время заезда.
+    * @param {string} checkout - время выезда.
+    * @param {Array.<string>} features - массив со списком удобств.
+    * @param {string} description - описание.
+    * @param {Array.<string>} photos - массив с путями к фотографиям предложения.
+    */
+
+  /**
+    * @typedef {Object} Location - объекс с координами метки предложения на карте.
+    * @param {number} x - x координата метки предложения на карте.
+    * @param {number} y - y координата метки предложения на карте.
+    */
+
+  /**
    * @enum {string} OfferTypesDict - названия типов предложений
    */
   var OfferTypesDict = {
@@ -85,7 +118,7 @@
     mapCardElement.querySelector('.popup__type').textContent = OfferTypesDict[advert.offer.type];
     mapCardElement.querySelector('.popup__text--capacity').textContent =
       advert.offer.rooms + ' ' + window.utils.getInclineNoun(['комната', 'комнаты', 'комнат'], advert.offer.rooms) + ' для ' +
-      advert.offer.guests + ' ' + window.utils.getInclineNoun(['гостя', 'гостей', 'гостей'], advert.offer.guests) + ' гостей';
+      advert.offer.guests + ' ' + window.utils.getInclineNoun(['гостя', 'гостей', 'гостей'], advert.offer.guests);
     mapCardElement.querySelector('.popup__text--time').textContent =
       'Заезд после ' + advert.offer.checkin +
       ', выезд до ' + advert.offer.checkout;
@@ -126,5 +159,4 @@
       cardStatus.deactivate();
     }
   };
-
 })();

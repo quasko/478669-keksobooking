@@ -1,7 +1,15 @@
 'use strict';
 
 (function () {
+  /**
+   * @constant {number}
+   */
   var ESC_KEYCODE = 27;
+
+  /**
+   * @constant {number}
+   */
+  var DEBOUNCE_INTERVAL = 500;
 
   /**
    * определение правильной формы множественного числа существительного
@@ -28,6 +36,19 @@
       if (evt.keyCode === ESC_KEYCODE) {
         action();
       }
+    },
+    debounce: function (callback) {
+      var lastTimeout = null;
+
+      return function () {
+        var args = arguments;
+        if (lastTimeout) {
+          clearTimeout(lastTimeout);
+        }
+        lastTimeout = setTimeout(function () {
+          callback.apply(null, args);
+        }, DEBOUNCE_INTERVAL);
+      };
     }
   };
 })();
