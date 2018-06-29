@@ -63,9 +63,12 @@
    * @param {Array.<Object>} files - массив выбранных файлов
    */
   var previewImages = function (input, files) {
-    clearImages();
     if (files) {
       input.files = files;
+    }
+
+    if (input === imagesInput) {
+      clearImages();
     }
 
     Array.from(input.files).forEach(function (file) {
