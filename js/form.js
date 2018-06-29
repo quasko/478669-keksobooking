@@ -64,7 +64,7 @@
     /* document.querySelectorAll('.ad-form__photo:not(:last-child)').forEach(function (item) {
       item.remove();
     }); */
-    window.image.clearImages();
+    window.image.clear();
     window.image.removeListeners();
     avatarPreview.src = DEFAULT_AVATAR_SRC;
     form.removeEventListener('invalid', formInvalidHandler);

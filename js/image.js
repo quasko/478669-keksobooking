@@ -135,6 +135,6 @@
       removeDragDropListeners(avatarDropZone);
       removeDragDropListeners(imageDropZone);
     },
-    clearImages: clearImages
+    clear: clearImages
   };
 })();
