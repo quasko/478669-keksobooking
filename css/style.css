@@ -888,6 +888,9 @@ fieldset {
           box-shadow: 0 0 2px 2px #ff6547;
 }
 
+.drop-highlight {
+  border-color: #ff5635;
+}
 
 /* Футер */
 
