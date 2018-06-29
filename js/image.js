@@ -31,6 +31,7 @@
 
   var dragEndFileHandler = function (evt) {
     evt.preventDefault();
+    evt.stopPropagation();
     if (evt.target.classList) {
       evt.target.classList.remove('drop-highlight');
     }
@@ -134,7 +135,7 @@
       imagesInput.removeEventListener('click', inputClickHandler);
       removeDragDropListeners(avatarDropZone);
       removeDragDropListeners(imageDropZone);
-    },
-    clear: clearImages
+      clearImages();
+    }
   };
 })();
