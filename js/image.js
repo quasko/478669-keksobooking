@@ -22,50 +22,72 @@
     'images': imagesInput
   };
 
-  var dragFileStartHandler = function (evt) {
+  var dragStartFileHandler = function (evt) {
     evt.preventDefault();
-    evt.target.classList.add('drop-highlight');
+    if (evt.target.classList) {
+      evt.target.classList.add('drop-highlight');
+    }
   };
 
-  var dragFileEndHandler = function (evt) {
+  var dragEndFileHandler = function (evt) {
     evt.preventDefault();
-    evt.target.classList.remove('drop-highlight');
+    if (evt.target.classList) {
+      evt.target.classList.remove('drop-highlight');
+    }
   };
 
   var dropFileHandler = function (evt) {
     evt.preventDefault();
     evt.stopPropagation();
-    DropZoneInput[evt.target.htmlFor].files = evt.dataTransfer.files;
+    evt.target.classList.remove('drop-highlight');
+    previewImages(DropZoneInput[evt.target.htmlFor], evt.dataTransfer.files);
   };
 
   var addDragDropListeners = function (element) {
-    element.addEventListener('dragenter', dragFileStartHandler);
-    element.addEventListener('dragover', dragFileStartHandler);
-    element.addEventListener('dragleave', dragFileEndHandler);
+    element.addEventListener('dragenter', dragStartFileHandler);
+    element.addEventListener('dragover', dragStartFileHandler);
+    element.addEventListener('dragleave', dragEndFileHandler);
     element.addEventListener('drop', dropFileHandler);
   };
 
   var removeDragDropListeners = function (element) {
-    element.removeEventListener('dragenter', dragFileStartHandler);
-    element.removeEventListener('dragover', dragFileStartHandler);
-    element.removeEventListener('dragleave', dragFileEndHandler);
+    element.removeEventListener('dragenter', dragStartFileHandler);
+    element.removeEventListener('dragover', dragStartFileHandler);
+    element.removeEventListener('dragleave', dragEndFileHandler);
     element.removeEventListener('drop', dropFileHandler);
   };
 
-  var avatarChangeHandler = function () {
-    var avatarFile = avatarInput.files[0];
-    if (!avatarFile.type.match('image')) {
-      return;
+  /**
+   * вставка выбранных изображений в соответствующее поле формы для предпросмотра
+   * @param {Node} input - поле input куда загружаются файлы
+   * @param {Array.<Object>} files - массив выбранных файлов
+   */
+  var previewImages = function (input, files) {
+    clearImages();
+    if (files) {
+      input.files = files;
     }
 
-    var reader = new FileReader();
-    reader.addEventListener('load', function () {
-      avatarPreview.src = reader.result;
+    Array.from(input.files).forEach(function (file) {
+      if (!file.type.match('image')) {
+        return;
+      }
+
+      var reader = new FileReader();
+      reader.addEventListener('load', function () {
+        if (input === avatarInput) {
+          avatarPreview.src = reader.result;
+        } else if (input === imagesInput) {
+          var newPhotoPreview = photoPreview.cloneNode();
+          newPhotoPreview.appendChild(createPhoto(reader.result));
+          photoContainer.insertBefore(newPhotoPreview, photoPreview);
+        }
+      });
+
+      if (file) {
+        reader.readAsDataURL(file);
+      }
     });
-
-    if (avatarFile) {
-      reader.readAsDataURL(avatarFile);
-    }
   };
 
   /**
@@ -82,47 +104,34 @@
     return imgElement;
   };
 
-  var imagesChangeHandler = function () {
-    var photoFiles = imagesInput.files;
-
-    Array.from(photoFiles).forEach(function (file) {
-      if (!file.type.match('image')) {
-        return;
-      }
-
-      var reader = new FileReader();
-
-      reader.addEventListener('load', function () {
-        var newPhotoPreview = photoPreview.cloneNode();
-        newPhotoPreview.appendChild(createPhoto(reader.result));
-        photoContainer.insertBefore(newPhotoPreview, photoPreview);
-      });
-
-      if (file) {
-        reader.readAsDataURL(file);
-      }
+  var clearImages = function () {
+    document.querySelectorAll('.ad-form__photo:not(:last-child)').forEach(function (item) {
+      item.remove();
     });
+  };
+
+  var inputChangeHandler = function (evt) {
+    previewImages(evt.target);
+    evt.target.removeEventListener('change', inputChangeHandler);
+  };
+
+  var inputClickHandler = function (evt) {
+    evt.target.addEventListener('change', inputChangeHandler);
   };
 
   window.image = {
     addListeners: function () {
-      avatarInput.addEventListener('change', avatarChangeHandler);
-      imagesInput.addEventListener('change', imagesChangeHandler);
+      avatarInput.addEventListener('click', inputClickHandler);
+      imagesInput.addEventListener('click', inputClickHandler);
       addDragDropListeners(avatarDropZone);
       addDragDropListeners(imageDropZone);
     },
     removeListeners: function () {
-      avatarInput.removeEventListener('change', avatarChangeHandler);
-      imagesInput.removeEventListener('change', imagesChangeHandler);
+      avatarInput.removeEventListener('click', inputClickHandler);
+      imagesInput.removeEventListener('click', inputClickHandler);
       removeDragDropListeners(avatarDropZone);
       removeDragDropListeners(imageDropZone);
     },
-    clearImages: function () {
-      document.querySelectorAll('.ad-form__photo').forEach(function (item) {
-        item.remove();
-      });
-      photoContainer.appendChild(photoPreview);
-
-    }
+    clearImages: clearImages
   };
 })();
