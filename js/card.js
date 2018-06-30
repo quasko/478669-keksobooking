@@ -49,7 +49,7 @@
     palace: 'Дворец'
   };
 
-  var mapElement = document.querySelector('.map');
+  var map = document.querySelector('.map');
   var template = document.querySelector('template').content;
   var mapFilter = document.querySelector('.map__filters-container');
 
@@ -72,7 +72,7 @@
    */
   var renderCard = function (card) {
     cardStatus.activeNode = card;
-    mapElement.insertBefore(card, mapFilter);
+    map.insertBefore(card, mapFilter);
   };
 
   /**
@@ -81,11 +81,11 @@
    * @return {Node}
    */
   var createFeature = function (feature) {
-    var listItemElement = document.createElement('li');
-    listItemElement.classList.add('popup__feature');
-    listItemElement.classList.add('popup__feature--' + feature);
+    var listItem = document.createElement('li');
+    listItem.classList.add('popup__feature');
+    listItem.classList.add('popup__feature--' + feature);
 
-    return listItemElement;
+    return listItem;
   };
 
   /**
@@ -94,13 +94,13 @@
    * @return {Node}
    */
   var createPhoto = function (src) {
-    var photoElement = document.createElement('img');
-    photoElement.classList.add('popup__photo');
-    photoElement.width = photoSize.WIDTH;
-    photoElement.height = photoSize.HEIGTH;
-    photoElement.alt = 'Фотография жилья';
-    photoElement.src = src;
-    return photoElement;
+    var photo = document.createElement('img');
+    photo.classList.add('popup__photo');
+    photo.width = photoSize.WIDTH;
+    photo.height = photoSize.HEIGTH;
+    photo.alt = 'Фотография жилья';
+    photo.src = src;
+    return photo;
   };
 
   /**
@@ -109,35 +109,35 @@
    * @return {Node}
    */
   var createCard = function (advert) {
-    var mapCardElement = template.querySelector('.map__card').cloneNode(true);
-    var closeButton = mapCardElement.querySelector('.popup__close');
+    var mapCard = template.querySelector('.map__card').cloneNode(true);
+    var closeButton = mapCard.querySelector('.popup__close');
 
-    mapCardElement.querySelector('.popup__title').textContent = advert.offer.title;
-    mapCardElement.querySelector('.popup__text--address').textContent = advert.offer.address;
-    mapCardElement.querySelector('.popup__text--price').textContent = advert.offer.price + '₽/ночь';
-    mapCardElement.querySelector('.popup__type').textContent = OfferTypesDict[advert.offer.type];
-    mapCardElement.querySelector('.popup__text--capacity').textContent =
+    mapCard.querySelector('.popup__title').textContent = advert.offer.title;
+    mapCard.querySelector('.popup__text--address').textContent = advert.offer.address;
+    mapCard.querySelector('.popup__text--price').textContent = advert.offer.price + '₽/ночь';
+    mapCard.querySelector('.popup__type').textContent = OfferTypesDict[advert.offer.type];
+    mapCard.querySelector('.popup__text--capacity').textContent =
       advert.offer.rooms + ' ' + window.utils.getInclineNoun(['комната', 'комнаты', 'комнат'], advert.offer.rooms) + ' для ' +
       advert.offer.guests + ' ' + window.utils.getInclineNoun(['гостя', 'гостей', 'гостей'], advert.offer.guests);
-    mapCardElement.querySelector('.popup__text--time').textContent =
+    mapCard.querySelector('.popup__text--time').textContent =
       'Заезд после ' + advert.offer.checkin +
       ', выезд до ' + advert.offer.checkout;
 
     advert.offer.features.forEach(function (item) {
-      mapCardElement.querySelector('.popup__features').appendChild((createFeature(item)));
+      mapCard.querySelector('.popup__features').appendChild((createFeature(item)));
     });
 
-    mapCardElement.querySelector('.popup__description').textContent = advert.offer.description;
+    mapCard.querySelector('.popup__description').textContent = advert.offer.description;
 
     advert.offer.photos.forEach(function (item) {
-      mapCardElement.querySelector('.popup__photos').appendChild(createPhoto(item));
+      mapCard.querySelector('.popup__photos').appendChild(createPhoto(item));
     });
 
-    mapCardElement.querySelector('.popup__avatar').src = advert.author.avatar;
+    mapCard.querySelector('.popup__avatar').src = advert.author.avatar;
     closeButton.addEventListener('click', cardCloseHandler);
     document.addEventListener('keydown', cardEscPressHandler);
 
-    return mapCardElement;
+    return mapCard;
   };
 
   var cardCloseHandler = function () {

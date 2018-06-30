@@ -29,14 +29,14 @@
    * @return {Node}
    */
   var createPinElement = function (pin) {
-    var mapPinElement = template.querySelector('.map__pin').cloneNode(true);
+    var mapPin = template.querySelector('.map__pin').cloneNode(true);
 
-    mapPinElement.style.left = (pin.location.x - mapPinSize.WIDTH / 2) + 'px';
-    mapPinElement.style.top = (pin.location.y - mapPinSize.HEIGHT).toString() + 'px';
-    mapPinElement.querySelector('img').src = pin.author.avatar;
-    mapPinElement.querySelector('img').alt = pin.offer.title;
+    mapPin.style.left = (pin.location.x - mapPinSize.WIDTH / 2) + 'px';
+    mapPin.style.top = (pin.location.y - mapPinSize.HEIGHT).toString() + 'px';
+    mapPin.querySelector('img').src = pin.author.avatar;
+    mapPin.querySelector('img').alt = pin.offer.title;
 
-    mapPinElement.addEventListener('click', function (evt) {
+    mapPin.addEventListener('click', function (evt) {
       if (evt.currentTarget !== pinStatus.activeNode) {
         pinStatus.deactivate();
         pinStatus.activate(evt.currentTarget);
@@ -45,8 +45,8 @@
       }
     });
 
-    mapPins.push(mapPinElement);
-    return mapPinElement;
+    mapPins.push(mapPin);
+    return mapPin;
   };
 
   /**

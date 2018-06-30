@@ -29,12 +29,12 @@
 
   var pageActivated = false;
   var mainPin = document.querySelector('.map__pin--main');
-  var mapElement = document.querySelector('.map');
-  var mapPinsElement = document.querySelector('.map__pins');
+  var map = document.querySelector('.map');
+  var mapPins = document.querySelector('.map__pins');
   var form = document.querySelector('.ad-form');
 
   var loadSuccessHandler = function (adverts) {
-    mapPinsElement.appendChild(window.pin.render(adverts.slice(0, DISPLAYED_ADVERTS)));
+    mapPins.appendChild(window.pin.render(adverts.slice(0, DISPLAYED_ADVERTS)));
     window.filter.enable();
     window.filter.copyAdverts(adverts);
   };
@@ -47,7 +47,7 @@
    * перевод формы в активное состояние
    */
   var activatePage = function () {
-    mapElement.classList.remove('map--faded');
+    map.classList.remove('map--faded');
     form.classList.remove('ad-form--disabled');
     window.form.enable();
     window.backend.load(loadSuccessHandler, loadErrorHandler);
@@ -116,7 +116,7 @@
       };
 
       var maxCoords = {
-        x: mapElement.clientWidth - mainPin.clientWidth / 2,
+        x: map.clientWidth - mainPin.clientWidth / 2,
         y: mainPinParams.verticalLimits.MAX - mainPinParams.size.active.HEIGHT
       };
 
@@ -162,7 +162,7 @@
   window.map = {
     reset: function () {
       pageActivated = false;
-      mapElement.classList.add('map--faded');
+      map.classList.add('map--faded');
       window.filter.disable();
       moveMainPin(mainPinParams.defaultPosition.LEFT, mainPinParams.defaultPosition.TOP);
       window.card.deactivate();
@@ -171,7 +171,7 @@
       initPage();
     },
     filter: function (adverts) {
-      mapPinsElement.appendChild(window.pin.render(adverts));
+      mapPins.appendChild(window.pin.render(adverts));
     }
   };
 })();

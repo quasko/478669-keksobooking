@@ -11,13 +11,18 @@
    */
   var POST_URL = 'https://js.dump.academy/keksobooking';
 
+  /**
+   * @constant {number}
+   */
+  var SUCCESS_STATUS_CODE = 200;
+
   var createXHR = function (method, url, loadHandler, errorHandler, data) {
     var xhr = new XMLHttpRequest();
     if (method === 'GET') {
       xhr.responseType = 'json';
     }
     xhr.addEventListener('load', function () {
-      if (xhr.status === 200) {
+      if (xhr.status === SUCCESS_STATUS_CODE) {
         loadHandler(xhr.response);
       } else {
         errorHandler('Во время загрузки произошла ошибка. Обновите страницу. Статус ответа: ' + xhr.status + ' ' + xhr.statusText);
