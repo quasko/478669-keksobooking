@@ -105,12 +105,12 @@
    * @return {Node}
    */
   var createPhoto = function (src) {
-    var imgElement = document.createElement('img');
-    imgElement.src = src;
-    imgElement.width = photoSize.WIDTH;
-    imgElement.height = photoSize.HEIGHT;
+    var image = document.createElement('img');
+    image.src = src;
+    image.width = photoSize.WIDTH;
+    image.height = photoSize.HEIGHT;
 
-    return imgElement;
+    return image;
   };
 
   var clearImages = function () {
