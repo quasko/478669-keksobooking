@@ -24,9 +24,14 @@
 
   var dragStartFileHandler = function (evt) {
     evt.preventDefault();
+    evt.stopPropagation();
     if (evt.target.classList) {
       evt.target.classList.add('drop-highlight');
     }
+  };
+
+  var dragOverFileHandler = function (evt) {
+    evt.preventDefault();
   };
 
   var dragEndFileHandler = function (evt) {
@@ -46,14 +51,14 @@
 
   var addDragDropListeners = function (element) {
     element.addEventListener('dragenter', dragStartFileHandler);
-    element.addEventListener('dragover', dragStartFileHandler);
+    element.addEventListener('dragover', dragOverFileHandler);
     element.addEventListener('dragleave', dragEndFileHandler);
-    element.addEventListener('drop', dropFileHandler);
+    element.addEventListener('drop', dropFileHandler, false);
   };
 
   var removeDragDropListeners = function (element) {
     element.removeEventListener('dragenter', dragStartFileHandler);
-    element.removeEventListener('dragover', dragStartFileHandler);
+    element.removeEventListener('dragover', dragOverFileHandler);
     element.removeEventListener('dragleave', dragEndFileHandler);
     element.removeEventListener('drop', dropFileHandler);
   };

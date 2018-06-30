@@ -182,9 +182,7 @@
   disableFieldsets();
 
   window.form = {
-    setAddress: function (address) {
-      setAddress(address);
-    },
+    setAddress: setAddress,
     enable: function () {
       form.addEventListener('invalid', formInvalidHandler, true);
       typeField.addEventListener('change', typeChangeHandler);

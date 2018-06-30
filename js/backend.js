@@ -11,25 +11,25 @@
    */
   var POST_URL = 'https://js.dump.academy/keksobooking';
 
-  var createXHR = function (method, url, onLoad, onError, data) {
+  var createXHR = function (method, url, loadHandler, errorHandler, data) {
     var xhr = new XMLHttpRequest();
     if (method === 'GET') {
       xhr.responseType = 'json';
     }
     xhr.addEventListener('load', function () {
       if (xhr.status === 200) {
-        onLoad(xhr.response);
+        loadHandler(xhr.response);
       } else {
-        onError('Во время загрузки произошла ошибка. Обновите страницу. Статус ответа: ' + xhr.status + ' ' + xhr.statusText);
+        errorHandler('Во время загрузки произошла ошибка. Обновите страницу. Статус ответа: ' + xhr.status + ' ' + xhr.statusText);
       }
     });
 
     xhr.addEventListener('error', function () {
-      onError('Произошла ошибка соединения. Статус ответа: ' + xhr.status + ' ' + xhr.statusText);
+      errorHandler('Произошла ошибка соединения. Статус ответа: ' + xhr.status + ' ' + xhr.statusText);
     });
 
     xhr.addEventListener('timeout', function () {
-      onError('Запрос не успел выполниться за ' + xhr.timeout + 'мс');
+      errorHandler('Запрос не успел выполниться за ' + xhr.timeout + 'мс');
     });
 
     xhr.open(method, url);
@@ -42,11 +42,11 @@
   };
 
   window.backend = {
-    load: function (onLoad, onError) {
-      createXHR('GET', GET_URL, onLoad, onError);
+    load: function (loadHandler, errorHandler) {
+      createXHR('GET', GET_URL, loadHandler, errorHandler);
     },
-    upload: function (data, onLoad, onError) {
-      createXHR('POST', POST_URL, onLoad, onError, data);
+    upload: function (data, loadHandler, errorHandler) {
+      createXHR('POST', POST_URL, loadHandler, errorHandler, data);
     }
   };
 

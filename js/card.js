@@ -134,20 +134,20 @@
     });
 
     mapCardElement.querySelector('.popup__avatar').src = advert.author.avatar;
-    closeButton.addEventListener('click', closeCard);
+    closeButton.addEventListener('click', cardCloseHandler);
     document.addEventListener('keydown', cardEscPressHandler);
 
     return mapCardElement;
   };
 
-  var closeCard = function () {
+  var cardCloseHandler = function () {
     cardStatus.deactivate();
     window.pin.deactivate();
     document.removeEventListener('keydown', cardEscPressHandler);
   };
 
   var cardEscPressHandler = function (evt) {
-    window.utils.isEscEvent(evt, closeCard);
+    window.utils.isEscEvent(evt, cardCloseHandler);
   };
 
   window.card = {
